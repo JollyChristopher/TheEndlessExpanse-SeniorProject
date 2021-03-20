@@ -1,0 +1,135 @@
+package halemaster.ee.world.faction;
+
+import halemaster.ee.world.Area;
+import java.util.HashSet;
+import java.util.Set;
+
+/**
+ * @name Settlement
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 9, 2013
+ */
+public class Settlement 
+{
+  private String name;
+  private transient Faction faction;
+  private int population;
+  private Set<Area> areas = new HashSet<Area> ();
+  
+  public Settlement (String name, Faction faction)
+  {
+    if (null == name)
+    {
+      throw new NullPointerException ("name");
+    }
+    
+    this.name = name;
+    this.faction = faction;
+  }
+  public String getName ()
+  {
+    return this.name;
+  }
+
+  public Faction getFaction ()
+  {
+    return this.faction;
+  }
+
+  public int getPopulation ()
+  {
+    return this.population;
+  }
+
+  public void setPopulation (int size)
+  {
+    this.population = size;
+  }
+
+  /**
+   * Get all areas this settlement is made of.
+   * 
+   * @return array of areas this settlement spans.
+   */
+  public Area[] getAreas ()
+  {
+    Area[] areaArray = new Area[this.areas.size ()];
+    this.areas.toArray (areaArray);
+    return areaArray;
+  }
+  
+  /**
+   * Add a new area for this settlement. If the area already exists, it is not
+   * added a second time.
+   * 
+   * @param x x of the area.
+   * @param y y of the area.
+   */
+  public void addArea (int x, int y)
+  {
+    this.areas.add (new Area (x, y));
+  }
+
+  /**
+   * Remove the area from this settlment at the given coordinates.
+   * 
+   * @param x x of the area.
+   * @param y y of the area.
+   * @return the area at the given location, or null if it isn't in this 
+   *         Settlement.
+   */
+  public Area removeArea (int x, int y)
+  {
+    Area removed = null;
+    Area tempArea = new Area (x, y);
+    
+    for (Area area : getAreas ())
+    {
+      if (area.equals (tempArea))
+      {
+        removed = area;
+        this.areas.remove (removed);
+      }
+    }
+    
+    return removed;
+  }
+  
+  /**
+   * Determine if equals another Settlement.
+   * 
+   * @param obj object to compare to.
+   * @return if the object equals this object.
+   */
+  @Override
+  public boolean equals (Object obj)
+  {
+    if (obj instanceof Settlement)
+    {
+      Settlement set = (Settlement) obj;
+      
+      return (set.getName ().equals (getName ()) && 
+              getFaction () == set.getFaction ());
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  /**
+   * Get hashcode fo this Settlement. Used for the above equals.
+   * 
+   * @return hashcode for this Settlement.
+   */
+  @Override
+  public int hashCode ()
+  {
+    int hash = 7;
+    hash = 53 * hash + (this.name != null ? this.name.hashCode () : 0);
+    hash = 53 * hash + (this.faction != null ? this.faction.hashCode () : 0);
+    return hash;
+  }
+}

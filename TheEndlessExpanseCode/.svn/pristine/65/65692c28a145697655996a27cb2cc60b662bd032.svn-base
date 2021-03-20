@@ -1,0 +1,64 @@
+package halemaster.ee.world.faction;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @name FactionHandler
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 9, 2013
+ */
+public class FactionHandler 
+{
+  private Map<String, Faction> factions = new HashMap<String, Faction> ();
+  
+  /**
+   * Get the faction with the given name from this handler.
+   * 
+   * @param name name of the faction.
+   * @return the faction with the given name.
+   */
+  public Faction getFaction (String name)
+  {
+    return factions.get (name);
+  }
+
+  /**
+   * Get all factions of this handler.
+   * 
+   * @return array of factions.
+   */
+  public Faction[] getFactions ()
+  {
+    Faction[] factionArray = new Faction[this.factions.size ()];
+    this.factions.values ().toArray (factionArray);
+    
+    return factionArray;
+  }
+
+  /**
+   * Add a new faction to this handler.
+   * 
+   * @param faction add the faction to the handler.
+   */
+  public void addFaction (Faction faction)
+  {
+    if (!this.factions.containsKey (faction.getName ()))
+    {
+      for (Faction temp : getFactions ())
+      {
+        faction.changeDiplomacy (temp, 0);
+      }
+
+      this.factions.put (faction.getName (), faction);
+    }
+  }
+  
+  
+  public void remove (String name)
+  {
+    this.factions.remove (name);
+  }
+}

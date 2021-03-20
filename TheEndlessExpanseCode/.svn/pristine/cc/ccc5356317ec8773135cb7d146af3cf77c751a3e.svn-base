@@ -1,0 +1,37 @@
+package halemaster.ee.world.micro;
+
+import halemaster.ee.world.history.HistoryGenerator;
+
+/**
+ * @name GenerationSequence
+ * 
+ * @version 0.0.0
+ * 
+ * @date Jan 28, 2014
+ */
+public class GenerationSequence implements Runnable
+{
+  private HistoryGenerator history;
+  private boolean finished = false;
+  
+  public GenerationSequence (HistoryGenerator history)
+  {
+    this.history = history;
+  }
+  
+  public HistoryGenerator getHistory ()
+  {
+    return this.history;
+  }
+  
+  public boolean isDone ()
+  {
+    return this.finished;
+  }
+
+  public void run ()
+  {
+    this.history.run ();
+    this.finished = true;
+  }
+}

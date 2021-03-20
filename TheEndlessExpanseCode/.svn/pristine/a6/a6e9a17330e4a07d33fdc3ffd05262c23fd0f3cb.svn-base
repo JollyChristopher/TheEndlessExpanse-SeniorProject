@@ -1,0 +1,240 @@
+package halemaster.ee.world.history.event.type;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+/**
+ * @name EventType
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class EventType 
+{
+  private String id;
+  private Map<String, String> variables;
+  private Map<String, Map<String, String>> changes;
+  private Map<String, List<Map<String, String>>> dependencies;
+  private Map<String, List<Map<String, String>>> lockouts;
+  private Map<String, Map<String, String>> counts;
+  private Map<String, Map<String, String>> causes;
+  private String description;
+
+  public String getId ()
+  {
+    return id;
+  }
+
+  public String getDescription ()
+  {
+    return description;
+  }
+  
+  public String[] getVariables ()
+  {
+    String[] variableNames = new String[0];
+    
+    variableNames = this.variables.keySet ().toArray (variableNames);
+    
+    return variableNames;
+  }
+  
+  public String getVariableType (String name)
+  {
+    return this.variables.get (name);
+  }
+  
+  public String[] getChangesIds ()
+  {
+    String[] ids = new String[0];
+    
+    ids = this.changes.keySet ().toArray (ids);
+    
+    return ids;
+  }
+  
+  public Map<String, String> getChanges (String id)
+  {
+    return this.changes.get (id);
+  }
+  
+  public String[] getDependenciesIds ()
+  {
+    String[] ids = new String[0];
+    
+    ids = this.dependencies.keySet ().toArray (ids);
+    
+    return ids;
+  }
+  
+  public List<Map<String, String>> getDependencies (String id)
+  {
+    return this.dependencies.get (id);
+  }
+  
+  public String getCountedDependency (EventType type)
+  {
+    List<Map<String, String>> dep = this.dependencies.get (type.getId ());
+    String[] countsAs = type.getCountsIds ();
+    String countAs = type.getId ();
+    
+    for (int i = 0; null == dep && i < countsAs.length; i++)
+    {
+      dep = this.dependencies.get (countsAs[i]);
+      if (null != dep)
+      {
+        countAs = countsAs[i];
+      }
+    }
+    
+    return countAs;
+  }
+  
+  public List<Map<String, String>> getDependencies (EventType type)
+  {
+    List<Map<String, String>> dep = new ArrayList<Map<String, String>>();
+    List<Map<String, String>> tempDep = this.dependencies.get (type.getId ());
+    String[] countsAs = type.getCountsIds ();
+    Map<String, String> copy;
+    
+    if (null != tempDep)
+    {
+      for (Map<String, String> singleDep : tempDep)
+      {
+        copy = new HashMap<String, String>();
+        for (Entry<String, String> entry : singleDep.entrySet ())
+        {
+          copy.put (entry.getKey (), entry.getValue ());
+        }
+        dep.add (copy);
+      }
+    }
+    
+    for (int i = 0; null == tempDep && i < countsAs.length; i++)
+    {
+      tempDep = this.dependencies.get (countsAs[i]);
+      if (null != tempDep)
+      {
+        for (Map<String, String> singleDep : tempDep)
+        {
+          copy = new HashMap<String, String>();
+          for (Entry<String, String> entry : singleDep.entrySet ())
+          {
+            copy.put (entry.getKey (), type.getCounts 
+                    (countsAs[i]).get (entry.getValue ()));
+          }
+          dep.add (copy);
+        }
+      }
+    }
+    
+    return dep;
+  }
+  
+  public String[] getLockoutsIds ()
+  {
+    String[] ids = new String[0];
+    
+    ids = this.lockouts.keySet ().toArray (ids);
+    
+    return ids;
+  }
+  
+  public String locksOut (EventType event)
+  {
+    String lock = null;
+    if (this.lockouts.containsKey (event.getId ()))
+    {
+      lock = event.getId();
+    }
+    
+    for (String countAs : event.getCountsIds ())
+    {
+      if (this.lockouts.containsKey (countAs))
+      {
+        lock = countAs;
+      }
+    }
+    
+    return lock;
+  }
+  
+  public List<Map<String, String>> getLockouts (String id)
+  {
+    return this.lockouts.get (id);
+  }
+  
+  public String getCountedLockout (EventType type)
+  {
+    List<Map<String, String>> locks = this.lockouts.get (type.getId ());
+    String[] countsAs = type.getCountsIds ();
+    String countAs = type.getId ();
+    
+    for (int i = 0; null == locks && i < countsAs.length; i++)
+    {
+      locks = this.lockouts.get (countsAs[i]);
+      if (null != locks)
+      {
+        countAs = countsAs[i];
+      }
+    }
+    
+    return countAs;
+  }
+  
+  public List<Map<String, String>> getLockouts (EventType type)
+  {
+    List<Map<String, String>> locks = this.lockouts.get (type.getId ());
+    String[] countsAs = type.getCountsIds ();
+    
+    for (int i = 0; null == locks && i < countsAs.length; i++)
+    {
+      locks = this.lockouts.get (countsAs[i]);
+      if (null != locks)
+      {
+        for (Map<String, String> singleLock : locks)
+        {
+          for (Entry<String, String> entry : singleLock.entrySet ())
+          {
+            singleLock.put (entry.getKey (), type.getCounts 
+                    (countsAs[i]).get (entry.getValue ()));
+          }
+        }
+      }
+    }
+    
+    return locks;
+  }
+  
+  public String[] getCountsIds ()
+  {
+    String[] ids = new String[0];
+    
+    ids = this.counts.keySet ().toArray (ids);
+    
+    return ids;
+  }
+  
+  public Map<String, String> getCounts (String id)
+  {
+    return this.counts.get (id);
+  }
+  
+  public String[] getCausesIds ()
+  {
+    String[] ids = new String[0];
+    
+    ids = this.causes.keySet ().toArray (ids);
+    
+    return ids;
+  }
+  
+  public Map<String, String> getCauses (String id)
+  {
+    return this.causes.get (id);
+  }
+}

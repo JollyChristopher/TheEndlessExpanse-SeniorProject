@@ -1,0 +1,128 @@
+package halemaster.ee.world.faction;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+/**
+ * @name FactionHandler
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 9, 2013
+ */
+public class FactionHandler 
+{
+  private Map<String, Faction> factions = new HashMap<String, Faction> ();
+  private Map<Integer, Map<Integer, Settlement>> cityLocations = 
+          new HashMap<Integer, Map<Integer, Settlement>>();
+  
+  /**
+   * Get the faction with the given name from this handler.
+   * 
+   * @param name name of the faction.
+   * @return the faction with the given name.
+   */
+  public Faction getFaction (String name)
+  {
+    return factions.get (name);
+  }
+
+  /**
+   * Get all factions of this handler.
+   * 
+   * @return array of factions.
+   */
+  public Faction[] getFactions ()
+  {
+    Faction[] factionArray = new Faction[this.factions.size ()];
+    this.factions.values ().toArray (factionArray);
+    
+    return factionArray;
+  }
+
+  /**
+   * Add a new faction to this handler.
+   * 
+   * @param faction add the faction to the handler.
+   */
+  public void addFaction (String name)
+  {
+    Faction faction = new Faction (name, this);
+    addFaction (faction);
+  }
+  
+  /**
+   * Add a new faction to this handler.
+   * 
+   * @param faction add the faction to the handler.
+   */
+  public void addFaction (Faction faction)
+  {
+    if (!this.factions.containsKey (faction.getName ()))
+    {
+      for (Faction temp : getFactions ())
+      {
+        faction.changeDiplomacy (temp, 0);
+      }
+
+      this.factions.put (faction.getName (), faction);
+    }
+  }
+  
+  public void remove (String name)
+  {
+    Faction faction = this.factions.remove (name);
+    for (Settlement settle : faction.getSettlements ())
+    {
+      faction.removeSettlement (settle.getName ());
+    }
+  }
+  
+  public void addSettlement (int x, int y, Settlement settlement)
+  {
+    Map<Integer, Settlement> cityX;
+    cityX = this.cityLocations.get (x);
+    if (null == cityX)
+    {
+      cityX = new HashMap<Integer, Settlement>();
+      this.cityLocations.put (x, cityX);
+    }
+    cityX.put (y, settlement);
+  }
+  
+  public Settlement getSettlement (int x, int y)
+  {
+    if (null != this.cityLocations.get (x))
+    {
+      return this.cityLocations.get (x).get (y);
+    }
+    return null;
+  }
+  
+  public List<Settlement> getSettlements ()
+  {
+    List<Settlement> settles = new ArrayList<Settlement>();
+    
+    for (Entry<Integer, Map<Integer, Settlement>> xLocs : 
+            this.cityLocations.entrySet ())
+    {
+      for (Entry<Integer, Settlement> yLocs : xLocs.getValue ().entrySet ())
+      {
+        settles.add (yLocs.getValue ());
+      }
+    }
+    
+    return settles;
+  }
+  
+  public void removeSettlement (int x, int y)
+  {
+    if (null != this.cityLocations.get (x))
+    {
+      this.cityLocations.get (x).remove (y);
+    }
+  }
+}

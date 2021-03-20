@@ -1,0 +1,121 @@
+package halemaster.ee.world;
+
+import halemaster.ee.Json;
+import halemaster.ee.world.terrain.tile.BiomeGeneration;
+import halemaster.ee.world.terrain.tile.Tile;
+import halemaster.ee.world.terrain.tile.TiledType;
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * @name BiomeClassifier
+ * 
+ * @version 0.0.0
+ * 
+ * @date Oct 30, 2013
+ */
+public class BiomeClassifier 
+{
+  public static final int BYTE_AMOUNT = 256;
+  public static final Biome DEFAULT = new Biome (Byte.MIN_VALUE, "Ocean", 
+          "0000ff00", (byte) 0, Byte.MIN_VALUE, Byte.MAX_VALUE, 
+          Byte.MIN_VALUE, Byte.MAX_VALUE, Byte.MIN_VALUE, Byte.MAX_VALUE,
+          new BiomeGeneration (new Tile[] {new Tile (new TiledType("block", 0),
+          0, 0, "Textures/terrain/ocean.png")}, new int[] {0}));
+  private static BiomeClassifier singleton = new BiomeClassifier ();
+  private Biome[] biomes = new Biome[BYTE_AMOUNT];
+  
+  public BiomeClassifier ()
+  {
+    setBiome (DEFAULT);
+  }
+  
+  /**
+   * Load the JSON file of biomes into the current classifier.
+   * 
+   * @param biomes file to load into the classifier.
+   * @throws IOException on failure to save/load from the file.
+   */
+  public void loadBiomeFile (File biomeFile) throws IOException
+  {
+    Biome[] biomesInFile = Json.getFromFile (biomeFile, Biome.class);
+    byte id;
+    
+    for (Biome biome : biomesInFile)
+    {
+      if (null == getBiomeById (biome.getId ()))
+      {
+        setBiome(biome);
+      }
+      else
+      {
+        id = (byte) (biome.getId () + 1);
+        while (id != biome.getId () && null != getBiomeById (id))
+        {
+          id++;
+        }
+        if (id != biome.getId ())
+        {
+          biome.setId (id);
+          setBiome(biome);
+        }
+      }
+    }
+    
+    Json.saveJson (biomeFile, biomesInFile);
+  }
+  
+  /**
+   * Return the biome with the given id.
+   * 
+   * @param id id of biome.
+   * @return the biome found.
+   */
+  public Biome getBiomeById (byte id)
+  {
+    return this.biomes[id - Byte.MIN_VALUE];
+  }
+  
+  /**
+   * Set the biome of the given id to the biome given.
+   * 
+   * @param biome biome to set into biome array.
+   */
+  private void setBiome (Biome biome)
+  {
+    this.biomes[biome.getId () - Byte.MIN_VALUE] = biome;
+  }
+  
+  /**
+   * load the biomes from the given path on the singleton classifier.
+   * 
+   * @param biomes path to load from.
+   * @throws IOException failure to save/load from file.
+   */
+  public static void loadBiomes (String biomes) throws IOException
+  {
+    loadBiomes (new File (biomes));
+  }
+  
+  /**
+   * load the biomes from the given file on the singleton classifier.
+   * 
+   * @param biomes file to load from.
+   * @throws IOException failure to save/load from file.
+   */
+  public static void loadBiomes (File biomes) throws IOException
+  {
+    singleton.loadBiomeFile (biomes);
+  }
+  
+  /**
+   * Return the Biome with the given id from the singleton classifier.
+   * 
+   * @param id id of biome to get.
+   * @return the biome of the given id.
+   */
+  public static Biome getBiome (byte id)
+  {
+    return singleton.getBiomeById (id);
+  }
+}

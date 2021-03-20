@@ -1,0 +1,114 @@
+package halemaster.ee.state;
+
+import com.jme3.app.Application;
+import com.jme3.app.state.AppStateManager;
+import de.lessvoid.nifty.controls.Label;
+import de.lessvoid.nifty.controls.Window;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.elements.render.ImageRenderer;
+import de.lessvoid.nifty.render.NiftyImage;
+
+/**
+ * @name Hud
+ * 
+ * @version 0.0.0
+ * 
+ * @date Oct 24, 2013
+ */
+public class Hud extends Menu
+{
+  public static final String FILE = "Interface/menu/hud.xml";
+  public static final String ID = "hud";
+  private PlayerState player;
+  
+  public Hud (PlayerState player)
+  {
+    super (FILE, ID);
+    
+    this.player = player;
+  }
+  
+  /**
+   * Initialize this menu.
+   * 
+   * @param manager manager to initialize with.
+   * @param app application to initialize with.
+   */
+  @Override
+  public void initialize (AppStateManager manager, Application app)
+  {
+    Label playerName;
+    Element playerImage;
+    Window characterWindow, invWindow;
+    NiftyImage playerNiftyImage;
+    Element characterImage;
+    
+    super.initialize (manager, app);
+    
+    playerName = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("player_name", Label.class);
+    playerImage = getNifty ().getCurrentScreen ().findElementByName 
+            ("player_image");
+    characterImage = getNifty ().getCurrentScreen ().findElementByName 
+            ("window_character_player_image");
+    characterWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_character", Window.class);
+    invWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_inventory", Window.class);
+    playerNiftyImage = getNifty ()
+            .createImage (this.player.getPlayerImage (), false);
+    
+    playerName.setText (this.player.getPlayerName ());
+    playerImage.getRenderer (ImageRenderer.class).setImage (playerNiftyImage); 
+    characterImage.getRenderer (ImageRenderer.class).setImage (playerNiftyImage); 
+    characterWindow.getElement ().hide ();
+    characterWindow.setTitle (this.player.getPlayerName ());
+    invWindow.getElement ().hide ();
+  }
+  
+  /**
+   * toggle opening of the character window
+   * 
+   * @return whether the input event was used up
+   */
+  public boolean openCharacter ()
+  {
+    Element characterWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_character", Window.class).getElement ();
+    
+    
+    if (characterWindow.isVisible ())
+    {
+      characterWindow.hide ();
+    }
+    else
+    {
+      characterWindow.show ();
+    }
+    
+    return true;
+  }
+  
+  /**
+   * toggle opening of the inventory window
+   * 
+   * @return whether the input event was used up
+   */
+  public boolean openInventory ()
+  {
+    Element inventoryWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_inventory", Window.class).getElement ();
+    
+    
+    if (inventoryWindow.isVisible ())
+    {
+      inventoryWindow.hide ();
+    }
+    else
+    {
+      inventoryWindow.show ();
+    }
+    
+    return true;
+  }
+}

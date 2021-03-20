@@ -1,0 +1,130 @@
+package halemaster.ee.quest;
+
+import halemaster.ee.world.entity.Entity;
+
+/**
+ * @name Quest
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ */
+public class Quest 
+{
+  public static final String PLAYER_SEPARATOR = Offer.WORLD_SEPARATOR;
+  public static final String QUEST_SEPARATOR = Offer.OFFER_SEPARATOR;
+  private String questId;
+  private String offerId;
+  private Requirement finishedRequirements;
+
+  public String getQuestId ()
+  {
+    return questId;
+  }
+
+  public void setQuestId (String questId)
+  {
+    this.questId = questId;
+  }
+
+  public String getOfferId ()
+  {
+    return offerId;
+  }
+
+  public void setOfferId (String offerId)
+  {
+    this.offerId = offerId;
+  }
+  
+  /**
+   * Determine if the quest is done or not
+   * @return true if quest is done
+   */
+  public boolean isDone ()
+  {
+    return false;
+  }
+  
+  /**
+   * Whenever the quest owner kills an entity, this should be called with that
+   * entity.
+   * @param entity entity that was killed.
+   */
+  public void onKill (Entity entity)
+  {
+    
+  }
+  
+  /**
+   * Whenever the quest owner talks to an entity, this should be called with
+   * that entity
+   * @param entity entity that was talked to.
+   */
+  public void onTalk (Entity entity)
+  {
+    
+  }
+  
+  /**
+   * Whenever the quest owner picks up an item, either through buying, finding,
+   * or removing from equiptment, this should be called with that particular
+   * stack (not the stack that this is merged with later!)
+   * @param item item stack that was picked up
+   */
+  public void onPickup (ItemSet item)
+  {
+    
+  }
+
+  /**
+   * Whenever the quest owner loses an item, either through selling, dropping,
+   * or adding to equiptment, this should be called with that particular
+   * stack (not the stack that it came from)
+   * @param item item stack that was lost
+   */
+  public void onLose (ItemSet item)
+  {
+    
+  }
+
+  /**
+   * Load the quest with the given id from file
+   * @param id id of quest to load
+   * @return the loaded quest
+   */
+  public static Quest loadQuest (String id)
+  {
+    return null;
+  }
+
+  /**
+   * Save the quest to file
+   * @param quest quest to save
+   */
+  public static void saveQuest (Quest quest)
+  {
+    
+  }
+
+  /**
+   * Create a new quest for a given player and offer
+   * @param playerName player that is getting quest
+   * @param offer offer to use for the quest
+   * @return the new quest.
+   */
+  public static Quest newQuest (String playerName, Offer offer)
+  {
+    return null;
+  }
+  
+  /**
+   * Deletes the given quest from file
+   * @param quest quest to delete.
+   * @param player player to delete quest from.
+   */
+  public static void deleteQuest (Quest quest, Entity player)
+  {
+    
+  }
+}

@@ -1,0 +1,13 @@
+package halemaster.ee.quest;
+
+/**
+ * @name Reward
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ */
+public class Reward 
+{
+
+}

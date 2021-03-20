@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty xmlns="http://nifty-gui.sourceforge.net/nifty-1.3.xsd" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xsi:schemaLocation="http://nifty-gui.sourceforge.net/nifty-1.3.xsd 
+http://nifty-gui.sourceforge.net/nifty-1.3.xsd">
+   <useStyles filename="Interface/TEEStyle.xml" />
+   <useControls filename="nifty-default-controls.xml" />
+
+   <style id="my-scrollpanel#scrollpanel">
+    <attributes backgroundColor="#0000"></attributes>
+    <effect overlay="true">
+      <onActive name="imageOverlay" filename="blackborder.png" 
+                imageMode="resize:1,30,1,1,1,30,1,1,1,30,1,1" post="true">
+      </onActive>
+    </effect>
+    </style>
+    <style id="my-scrollpanel#bottom-right">
+      <attributes width="23px" height="23px"></attributes>
+    </style>
+    <controlDefinition name="healthbar" controller="halemaster.ee.state.HealthBarControl">
+      <panel childLayout="horizontal" width="100%" height="100%">
+        <image id="heart_1" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_2" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_3" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_4" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_5" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_6" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_7" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_8" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_9" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_10" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+      </panel>
+    </controlDefinition>
+  <!-- +++++++++++++++++++++++++++++++++++++++ -->
+  <!-- hud screen -->
+  <!-- +++++++++++++++++++++++++++++++++++++++ -->
+  <screen id="hud" controller="halemaster.ee.state.Hud">
+    <layer id="main-layer" childLayout="vertical" height="100%" width="100%">
+      <panel id="top-panel" height="20%" width="100%"
+             childLayout="horizontal" visibleToMouse="false">
+        <panel id="player" width="25%" height="95%" childLayout="vertical" 
+               visibleToMouse="true">
+          <image filename="Interface/Images/target_rim.png"
+                 width="100%" height="100%" childLayout="horizontal"
+                 imageMode="resize:6,4,6,6,6,4,6,4,6,4,6,6">
+            <panel id="player_stats" childLayout="horizontal" height="95%">
+              <panel childLayout="vertical" width="30%" height="95%">
+                <image id="player_image" filename="Interface/Images/character.png"
+                       align="center" width="100%" height="100%"/>
+              </panel>
+              <panel childLayout="vertical" height="95%"
+                     width="70%">
+                <control name="label" id="player_name" text="NAME OF PLAYER"
+                         width="100%" height="50%"/>
+                <control name="healthbar" id="player_health" 
+                         height="25%" width="100%" percentage="0.85"/>
+                <panel id="player_effects" childLayout="horizonal" height="25%">
+                </panel>
+              </panel>
+            </panel>
+          </image>
+        </panel>
+        <panel width="2%"/>
+        <panel id="target" width="25%" height="95%" childLayout="vertical" 
+               visibleToMouse="true">
+          <image filename="Interface/Images/target_rim.png"
+                 width="100%" height="100%" childLayout="horizontal"
+                 imageMode="resize:6,4,6,6,6,4,6,4,6,4,6,6">
+            <panel id="target_stats" childLayout="horizontal" height="95%">
+              <panel childLayout="vertical" width="30%" height="95%">
+                <image id="target_image" filename="Interface/Images/character.png"
+                       align="center" width="100%" height="100%"/>
+              </panel>
+              <panel childLayout="vertical" height="95%"
+                     width="70%">
+                <control name="label" id="target_name" text="NAME OF PLAYER"
+                         width="100%" height="50%"/>
+                <control name="healthbar" id="target_health" 
+                         height="25%" width="100%" percentage="0.85"/>
+                <panel id="target_effects" childLayout="horizonal" height="25%">
+                </panel>
+              </panel>
+            </panel>
+          </image>
+        </panel>
+        <panel width="28%"/>
+        <panel id="buttons" childLayout="horizontal" height="60%" width="20%"
+                valign="center">
+          <image id="InvBtn" filename="Interface/Images/inventory.png" width="24%" 
+               height="90%" childLayout="horizontal" align="center" valign="center">
+            <interact onClick="openInventory()"/>
+          </image>
+          <panel width="1%"/>
+          <image id="CharBtn" filename="Interface/Images/character.png" width="24%" 
+                 height="90%" childLayout="horizontal" align="center" valign="center">
+              <interact onClick="openCharacter()"/>
+          </image>
+          <panel width="1%"/>
+          <image id="QuestBtn" filename="Interface/Images/quests.png" width="24%" 
+                 height="90%" childLayout="horizontal" align="center" valign="center">
+              <interact onClick="openQuestLog()"/>
+          </image>
+          <panel width="1%"/>
+          <image id="OptBtn" filename="Interface/Images/options.png" width="24%" 
+                 height="90%" childLayout="horizontal" align="center" valign="center">
+              <interact onClick="openOptions()"/>
+          </image>
+        </panel>
+      </panel>
+      <panel height="80%" childLayout="horizontal">
+        <panel height="100%" width="30%" childLayout="vertical">
+          <panel height="70%"/>
+          <panel height="30%" childLayout="horizontal">
+            <control id="chatArea" name="nifty-chat" width="100%" height="100%" 
+                     lines="3" sendLabel="${CALL.localize(game.hud.speak)}" />
+          </panel>
+        </panel>
+        <panel height="100%" width="70%" childLayout="vertical">
+          <panel height="82%"/>
+          <panel height="18%" childLayout="horizontal">
+            <panel width="1%"/>
+            <image id="skill-1-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-1" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(1)" />
+                <text text='1' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+            <panel width="1%"/>
+            <image id="skill-2-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-2" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(2)" />
+                <text text='2' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+            <panel width="1%"/>
+            <image id="skill-3-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-3" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(3)" />
+                <text text='3' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+            <panel width="1%"/>
+            <image id="skill-4-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-4" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(4)" />
+                <text text='4' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+            <panel width="1%"/>
+            <image id="skill-5-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-5" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(5)" />
+                <text text='5' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+            <panel width="1%"/>
+            <image id="skill-5-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-6" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(6)" />
+                <text text='6' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+            <panel width="1%"/>
+            <image id="skill-7-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-7" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(7)" />
+                <text text='7' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+            <panel width="1%"/>
+            <image id="skill-8-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-8" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(8)" />
+                <text text='8' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+            <panel width="1%"/>
+            <image id="skill-9-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-9" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(9)" />
+                <text text='9' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+            <panel width="1%"/>
+            <image id="skill-0-back" filename="Interface/Images/skill_back.png" width="9%" height="90%"
+              childLayout="horizontal" align="center" valign="center">
+              <panel width="10%" />
+              <image id="skill-0" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                align="center" valign="center" childLayout="horizontal">
+                <interact onClick="skill(0)" />
+                <text text='0' textHAlign="right" align="right" valign="bottom"
+                  font="Interface/Fonts/Default.fnt" width="100%"/>
+              </image>
+            </image>
+          </panel>
+        </panel>
+      </panel>
+    </layer>
+    <layer id="windows" childLayout="absolute">
+      <control id="window_character" name="window" title="CHARACTER_NAME" 
+               width="300px" height="312px" y="20%" 
+               x="${CALL.getWidthPercent(99,300)}px" childLayout="vertical"
+               visibleToMouse="true" hideOnClose="true">
+        <panel height="100%" childLayout="vertical">
+          <panel height="40%" childLayout="horizontal">
+            <image id="window_character_player_image" 
+                   filename="Interface/Images/character.png"
+                   width="40%" height="100%"/>
+            <panel width="60%" height="100%" childLayout="vertical">
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <control id="char_name" name="label" align="left"/>
+              </panel>
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <text text='${CALL.localize(game.level)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_level" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.level.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <text text='${CALL.localize(game.xp)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_xp" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.xp.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <text text='${CALL.localize(game.points)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_points" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.points.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <text text='${CALL.localize(game.health)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_health" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.health.explain)}"/>
+                </effect>
+              </panel>
+            </panel>
+          </panel>
+          <panel height="50%" childLayout="horizontal">
+            <panel width="50%" height="100%" childLayout="vertical">
+              <text text='Equipment!' wrap="true"
+                      font="Interface/Fonts/Default.fnt"/>
+            </panel>
+            <panel width="50%" height="100%" childLayout="vertical">
+              <panel width="100%" height="12.5%" childLayout="horizontal"
+                visibleToMouse="true">
+                <interact onClick="addPower()"/>
+                <text text='${CALL.localize(game.power)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_power" name="label" align="left"/>
+                  <effect>
+                    <onHover name="hint" hintText="${CALL.localize(game.power.explain)}"/>
+                  </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal"
+                visibleToMouse="true">
+                <interact onClick="addAgility()"/>
+                <text text='${CALL.localize(game.agility)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_agility" name="label" align="left"/>
+                  <effect>
+                    <onHover name="hint" hintText="${CALL.localize(game.agility.explain)}"/>
+                  </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal"
+                visibleToMouse="true">
+                <interact onClick="addIntellect()"/>
+                <text text='${CALL.localize(game.intellect)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_intellect" name="label" align="left"/>
+                  <effect>
+                    <onHover name="hint" hintText="${CALL.localize(game.intellect.explain)}"/>
+                  </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal">
+                <text text='${CALL.localize(game.damage)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_damage" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.damage.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal">
+                <text text='${CALL.localize(game.armor)}' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_armor" name="label" align="left" width="*"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.armor.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal">
+                <text text='${CALL.localize(game.accuracy)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_accuracy" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.accuracy.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal">
+                <text text='${CALL.localize(game.craft)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_craft" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.craft.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal" childAlign="left">
+                <text text='${CALL.localize(game.critical)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_critical" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.critical.explain)}"/>
+                </effect>
+              </panel>
+            </panel>
+          </panel>
+        </panel>
+      </control>
+      <control id="window_chat" name="window" title="NEW_QUEST" 
+               width="300px" height="212px" y="100px" childLayout="vertical"
+               visibleToMouse="true" hideOnClose="true">
+        <panel height="100%" childLayout="vertical">
+          <control id="chat_description" name="label" width="100%" wrap="true"
+                   text="DESCRIPTION"/>
+        </panel>
+      </control>
+      <control id="window_quest" name="window" title="Quest Log" 
+               width="300px" height="312px" x="1%" y="20%" 
+               childLayout="vertical" visibleToMouse="true" hideOnClose="true">
+        <panel height="100%" childLayout="vertical">
+          <control id="questLog" name="listBox" displayItems="2" 
+                   selectionMode="Single" forceSelection="true" vertical="on"
+                   horizontal="off" width="100%" height="20%"/>
+          <panel id="secondHalf" width="100%" height="80%" childLayout="vertical">
+            <control id="questScroll" name="scrollPanel" horizontal="false"
+                      width="100%" height="100%" style="my-scrollpanel"
+                      pageSizeY="200.0" stepSizeY="50.0">
+              <panel id="questScroll" width="100%" valign="top" childLayout="vertical">
+                <control id="currentQuestTitle" name="label" width="96%" 
+                         wrap="true" align="center" text=""/>
+                <panel id="horizontlScroll" width="100%" valign="top"
+                       childLayout="horizontal">
+                  <panel width="2%"/>
+                  <control id="currentQuestDescription" name="label" width="96%" 
+                           wrap="true" align="left" valign="top" text=""/>
+                </panel>
+                <panel width="100%" valign="top"
+                       childLayout="horizontal">
+                  <panel width="2%"/>
+                  <control id="questRequirements" name="label" width="96%" 
+                           wrap="true" align="left" valign="top" text=""/>
+                </panel>
+              </panel>
+            </control>
+          </panel>
+        </panel>
+      </control>
+      <control id="window_inventory" name="window" title="Inventory" 
+               width="200px" height="212px" 
+               y="${CALL.getHeightPercent(85.6,212)}px" 
+               x="${CALL.getWidthPercent(99,200)}px"
+               childLayout="vertical" visibleToMouse="true" hideOnClose="true">
+        <panel height="100%" childLayout="vertical">
+          <panel height="20%" childLayout="horizontal">
+            <image id="inv_0,0" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_1,0" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_2,0" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_3,0" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_4,0" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+          </panel>
+          <panel height="20%" childLayout="horizontal">
+            <image id="inv_0,1" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_1,1" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_2,1" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_3,1" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_4,1" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+          </panel>
+          <panel height="20%" childLayout="horizontal">
+            <image id="inv_0,2" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_1,2" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_2,2" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_3,2" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_4,2" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+          </panel>
+          <panel height="20%" childLayout="horizontal">
+            <image id="inv_0,3" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_1,3" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_2,3" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_3,3" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+            <image id="inv_4,3" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+              align="center" valign="center" childLayout="horizontal">
+              <text text='0' textHAlign="right" align="right" valign="bottom"
+                font="Interface/Fonts/Default.fnt" width="100%"/>
+            </image>
+          </panel>
+          <panel height="20%" childLayout="horizontal">
+            <control name="label" id="coin_copper" text='0' align="center" 
+                     valign="center" font="Interface/Fonts/Default.fnt" 
+                     width="16.6%"/>
+            <image id="inv_0,0" filename="Interface/Images/copper.png" 
+                   width="16.6%" height="100%" align="center" valign="center">
+            </image>
+            <control name="label" id="coin_silver" text='0' align="center" 
+                     valign="center" font="Interface/Fonts/Default.fnt" 
+                     width="16.6%"/>
+            <image id="inv_0,0" filename="Interface/Images/silver.png" 
+                   width="16.6%" height="100%" align="center" valign="center">
+            </image>
+            <control name="label" id="coin_gold" text='0' align="center" 
+                     valign="center" font="Interface/Fonts/Default.fnt" 
+                     width="16.6%"/>
+            <image id="inv_0,0" filename="Interface/Images/gold.png" 
+                   width="16.6%" height="100%" align="center" valign="center">
+            </image>
+          </panel>
+        </panel>
+      </control>
+    </layer>
+  </screen>
+  <popup id="consolePopup" childLayout="center" backgroundColor="#000a">
+    <effect>
+      <onStartScreen name="fade" start="#0" end="#a" length="200" inherit="true"/>
+      <onEndScreen name="fade" start="#a" end="#0" length="200" startDelay="100" inherit="true"/>
+    </effect>
+    <panel childLayout="center" width="95%" align="center" valign="center">
+      <control id="console" name="nifty-console" lines="25" align="center" valign="center">
+        <effect>
+          <onStartScreen name="move" direction="top" mode="in" length="200" startDelay="100" inherit="true"/>
+          <onEndScreen name="move" direction="top" mode="out" length="200" startDelay="0" inherit="true"/>
+        </effect>
+      </control>
+    </panel>
+  </popup>
+</nifty>

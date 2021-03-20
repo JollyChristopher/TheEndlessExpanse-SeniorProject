@@ -1,0 +1,83 @@
+package halemaster.ee.state.start;
+
+import de.lessvoid.nifty.controls.TextField;
+import halemaster.ee.Game;
+import halemaster.ee.state.Menu;
+import halemaster.ee.state.PlayerState;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.logging.Level;
+
+/**
+ * @name MenuNewCharacter
+ * 
+ * @version 0.0.0
+ * 
+ * @date Oct 24, 2013
+ */
+public class MenuNewCharacter extends Menu
+{
+  public static final String FILE = "Interface/menu/newCharacter.xml";
+  public static final String ID = "newCharacter";
+  
+  public MenuNewCharacter ()
+  {
+    super (FILE, ID);
+  }
+  
+  /**
+   * Called when the create button is clicked.
+   * 
+   * @return whether the click is consumed.
+   */
+  public boolean create ()
+  {
+    TextField nameElement;
+    String characterName;
+    File charactersDirectory =  new File (Game.HOME + 
+            Game.GAME_FOLDER + Game.PLAYER_FOLDER);
+    File characterDirectory;
+    File file;
+    BufferedWriter writer;
+    
+    nameElement = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("name_text", TextField.class);
+    
+    characterName = nameElement.getText ();
+    
+    file = new File (Game.HOME + Game.GAME_FOLDER + Game.PLAYER_FOLDER + 
+            "/" + characterName + "/" + PlayerState.PLAYER_IMAGE_FILE);
+    
+    characterDirectory =
+            new File (charactersDirectory.getPath () + "/" + characterName);
+    
+    if (!charactersDirectory.exists ())
+    {
+      charactersDirectory.mkdirs ();
+    }
+    
+    if (!characterDirectory.exists ())
+    {
+      characterDirectory.mkdirs ();
+      try
+      {
+        file.createNewFile ();
+        writer = new BufferedWriter (new FileWriter (file));
+
+        writer.write (PlayerState.PLAYER_IMAGE.KNIGHT_M.name ());
+
+        writer.close ();
+      }
+      catch (IOException e)
+      {
+        LOGGER.log (Level.SEVERE, "Could not save player", e);
+      }
+    }
+    
+    back ();
+    
+    return true;
+  }
+}

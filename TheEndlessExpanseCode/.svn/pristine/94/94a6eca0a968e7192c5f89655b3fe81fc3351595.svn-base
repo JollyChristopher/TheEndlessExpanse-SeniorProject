@@ -1,0 +1,79 @@
+package halemaster.ee.world.micro;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import halemaster.ee.world.Area;
+import halemaster.ee.world.history.HistoryGenerator;
+import halemaster.ee.world.history.event.EventHolder;
+import halemaster.ee.world.history.event.type.EventTypeHolder;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+/**
+ * @name WorldHolder
+ * 
+ * @version 0.0.0
+ * 
+ * @date Jan 25, 2014
+ */
+public class WorldHolder implements Runnable
+{
+  public static int THREAD_COUNT = 20;
+  
+  private ConcurrentHashMap<String, Area> playerLocations = 
+          new ConcurrentHashMap<String, Area>();
+  private EventHolder currentEvents;
+  private EventTypeHolder possibleEvents;
+  private List<HistoryGenerator> currentGenerators =
+          new ArrayList<HistoryGenerator> ();
+  private Set<Area> generatedAreas = new HashSet<Area> ();
+  private ExecutorService runners = Executors.newFixedThreadPool (THREAD_COUNT, 
+          new ThreadFactoryBuilder().setNameFormat("TEE-generator-%d").build());
+  private volatile boolean running = true;
+
+  public WorldHolder (EventTypeHolder types, EventHolder events)
+  {
+    this.possibleEvents = types;
+    this.currentEvents = events;
+  }
+  
+  public EventHolder getEvents ()
+  {
+    return this.currentEvents;
+  }
+  
+  public void setPlayerLocation (String player, Area area)
+  {
+    if (null == area)
+    {
+      this.playerLocations.remove (player);
+    }
+    else
+    {
+      this.playerLocations.put (player, area);
+    }
+  }
+  
+  public void stop ()
+  {
+    this.running = false;
+  }
+  
+  public void run ()
+  {
+    while (running)
+    {
+      // wait until there is space in executors
+      
+      // look through list for generators that have finished, then merge with
+      // our current events holder, then remove them from the list
+      
+      // while there is space in the executors, find new locations to generate
+      // with priority based upon player location
+    }
+  }
+}

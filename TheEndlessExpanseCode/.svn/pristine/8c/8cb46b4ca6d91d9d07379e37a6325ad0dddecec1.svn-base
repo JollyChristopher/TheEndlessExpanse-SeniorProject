@@ -1,0 +1,9 @@
+hud.kill=Kill {0} / {1} {2}s
+hud.talk=Talk to {0}
+hud.item=Gather {0} / {1} {2}s
+
+quest.title.talk.friendly=Deliver {0}s message to {1}
+quest.title.kill.any=Kill {2} {1}s!
+
+quest.description.talk.friendly={0} wants you to deliver a friendly message to {1}
+quest.description.kill.any={0} wants you to kill {2} {1}s. They should be found nearby.

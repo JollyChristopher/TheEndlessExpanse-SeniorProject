@@ -1,0 +1,484 @@
+package halemaster.ee.state;
+
+import com.jme3.app.Application;
+import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
+import com.jme3.collision.CollisionResult;
+import com.jme3.collision.CollisionResults;
+import com.jme3.input.MouseInput;
+import com.jme3.input.controls.ActionListener;
+import com.jme3.input.controls.AnalogListener;
+import com.jme3.input.controls.KeyTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
+import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
+import com.jme3.math.Ray;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.CameraNode;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.control.CameraControl.ControlDirection;
+import com.jme3.scene.shape.Box;
+import halemaster.ee.Game;
+import halemaster.ee.Sprite;
+import halemaster.ee.world.Area;
+import halemaster.ee.world.Biome;
+import halemaster.ee.world.BiomeClassifier;
+import halemaster.ee.world.Config;
+import halemaster.ee.world.history.event.EventHolder;
+import halemaster.ee.world.history.event.EventIO;
+import halemaster.ee.world.history.event.type.EventType;
+import halemaster.ee.world.history.event.type.EventTypeHolder;
+import halemaster.ee.world.macro.MacroTerrainGenerator;
+import halemaster.ee.world.micro.WorldHolder;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * @name PlayerState
+ * 
+ * @version 0.0.0
+ * 
+ * @date Oct 16, 2013
+ */
+public class PlayerState extends AbstractAppState implements ActionListener, 
+        AnalogListener 
+{
+  public static final Logger LOGGER = Logger.getLogger 
+          (PlayerState.class.getName ());
+  public static final String CLICK_NAME = "Player_SelectSpace";
+  public static final String[] PLAYER_IMAGES = 
+  {
+    "Textures/entities/player_1.png",
+    "Textures/entities/player_2.png",
+    "Textures/entities/player_3.png"
+  };
+  public static final String LOCATION_FOLDER = "/areas";
+  public static final String FORWARD = "Player_forward_key";
+  public static final String BACKWARD = "Player_back_key";
+  public static final String LEFT = "Player_left_key";
+  public static final String RIGHT = "Player_right_key";
+  public static final String EVENT_SPLITTER = "\t";
+  public static final float FORWARD_MOVE = 1f;
+  public static final float BACK_MOVE = -1f;
+  private static final float WALK_SPEED = 6f;
+  private static final float STEP_SIZE = 1f;
+  private static final float HOLD_AMOUNT = 0.25f;
+  private static final float BOX_SIZE = 5;
+  private static final float PLAYER_HEIGHT = 1f;
+  
+  private Game game;
+  private CameraNode playerCam;
+  private float held = 0f;
+  private String worldName; // this and player name are used to load game.
+  private String playerName;
+  private WorldHolder world;
+  private Sprite player; // Will be replaced with Entity later, after that
+                          // module is built.
+  private Geometry terrain; // Will be obtained from world state later
+  private Vector3f moveTo; // will be used to walk to for now.
+  
+  public PlayerState (String worldName, String playerName)
+  {
+    this.worldName = worldName;
+    this.playerName = playerName;
+  }
+  
+  /**
+   * initialize this AppState.
+   * 
+   * @param manager State Manager that this is being attached to.
+   * @param app Application that this is being attached to.
+   */
+  @Override
+  public void initialize (AppStateManager manager, Application app)
+  {
+    Box tempBox = new Box (BOX_SIZE, 1, BOX_SIZE);
+    Material tempMat;
+    EventTypeHolder types;
+    EventHolder events;
+    Biome[][] biomes;
+    EventType[] typeArr;
+    File overTypeFolder = 
+            new File (EventIO.EVENT_FOLDER + EventIO.GLOBAL_FOLDER);
+    File typeFolder = new File (EventIO.EVENT_FOLDER + EventIO.LOCAL_FOLDER);
+    String spawnArea;
+    
+    this.game = (Game) app;
+    
+    setClickToMove (this.game.getSettings ().getBoolean (CLICK_NAME));
+    setKeys (true);
+    
+    this.player = new Sprite ("Player", this.game.getAssetManager (), .5f, 
+            10, PLAYER_IMAGES);
+    this.player.attachTo (this.game.getRootNode ());
+    
+    this.playerCam = new CameraNode("Player Camera", this.game.getCamera ());
+    this.playerCam.setControlDir(ControlDirection.SpatialToCamera);
+    this.game.getRootNode ().attachChild (this.playerCam);
+    this.playerCam.setLocalTranslation(new Vector3f(0, 32, 0));
+    this.playerCam.lookAt(this.player.getImage ().getLocalTranslation(),
+            Vector3f.UNIT_Y);
+    
+    this.terrain = new Geometry ("Terrain", tempBox);
+    tempMat = new Material (this.game.getAssetManager (), 
+            "Common/MatDefs/Misc/Unshaded.j3md");
+    tempMat.setColor ("Color", ColorRGBA.Orange);
+    this.terrain.setMaterial (tempMat);
+    this.game.getRootNode ().attachChild (this.terrain);
+    this.terrain.move (0, -PLAYER_HEIGHT, 0);
+    
+    try
+    {
+      types = new EventTypeHolder ();
+      
+      for (File typeLocation : typeFolder.listFiles ())
+      {
+        typeArr = EventIO.getTypes (typeLocation);
+        for (EventType type : typeArr)
+        {
+          types.addType (type);
+        }
+      }
+      
+      for (File overTypeLocation : overTypeFolder.listFiles ())
+      {
+        typeArr = EventIO.getTypes (overTypeLocation);
+        for (EventType type : typeArr)
+        {
+          types.addType (type);
+        }
+      }
+      
+      biomes = loadBiomes ();
+      events = new EventHolder (this.worldName, biomes);
+      events = EventIO.getEvents (worldName, events, Area.ANYWHERE.getX (), 
+              Area.ANYWHERE.getX (), Area.ANYWHERE.getY (), 
+              Area.ANYWHERE.getY (), types);
+      
+      types = new EventTypeHolder ();
+      
+      for (File typeLocation : typeFolder.listFiles ())
+      {
+        typeArr = EventIO.getTypes (typeLocation);
+        for (EventType type : typeArr)
+        {
+          types.addType (type);
+        }
+      }
+      
+      spawnArea = Config.getValue (this.worldName,
+              MacroTerrainGenerator.SPAWN_POINT);
+      this.world = new WorldHolder (this, types, events);
+      this.world.setPlayerLocation (this.playerName, new Area (Integer.valueOf 
+              (spawnArea.split (",")[0]),Integer.valueOf 
+              (spawnArea.split (",")[1])));
+      
+      Thread worldThread = new Thread (this.world);
+      worldThread.setName ("TEE-world");
+      worldThread.setPriority (Thread.MIN_PRIORITY);
+      worldThread.start ();
+    }
+    catch (IOException e)
+    {
+      this.game.handleError ("Failure to load events", e);
+    }
+    catch (InstantiationException e)
+    {
+      this.game.handleError ("Failure to load events", e);
+    }
+    catch (IllegalAccessException e)
+    {
+      this.game.handleError ("Failure to load events", e);
+    }
+    
+    super.initialize (manager, app);
+  }
+  
+  private Biome[][] loadBiomes ()
+  {
+    File biomeFile = new File (Game.HOME + Game.GAME_FOLDER + Game.WORLD_FOLDER +
+            "/" + this.worldName + "/" + MacroTerrainGenerator.TERRAIN_FILE);
+    int size;
+    Biome[][] biomes = null;
+    BufferedReader reader;
+    
+    try
+    {
+      size = Integer.valueOf (Config.getValue (this.worldName, 
+            MacroTerrainGenerator.SIZE_KEY));
+      biomes = new Biome[size][size];
+      reader = new BufferedReader (new FileReader (biomeFile));
+      
+      for (int i = 0; i < biomes.length; i++)
+      {
+        for (int j = 0; j < biomes[i].length; j++)
+        {
+          biomes[i][j] = BiomeClassifier.getBiome ((byte) reader.read());
+        }
+      }
+      
+      reader.close ();
+    }
+    catch (IOException e)
+    {
+      LOGGER.log (Level.SEVERE, "Could not load biomes!", e);
+    }
+    
+    return biomes;
+  }
+  
+  /**
+   * cleanup this AppState.
+   */
+  @Override
+  public void cleanup ()
+  {
+    this.player.detachFrom (this.game.getRootNode ());
+    this.game.getRootNode ().detachChild (this.playerCam);
+    this.game.getRootNode ().detachChild (this.terrain);
+    this.game.getInputManager ().removeListener (this);
+    
+    setClickToMove (false);
+    
+    this.playerCam = null;
+    this.world.stop ();
+    
+    super.cleanup ();
+  }
+  
+  /**
+   * Set the movement keys to on or off.
+   * 
+   * @param on whether to turn keys on or off.
+   */
+  public void setKeys (boolean on)
+  {
+    try
+    {
+      if (on)
+      {
+        this.game.getInputManager ().addMapping (FORWARD, 
+              new KeyTrigger (Integer.valueOf(this.game.getSettings ()
+                .getString (FORWARD).split (EVENT_SPLITTER)[1])));
+        this.game.getInputManager ().addListener (this, FORWARD);
+        this.game.getInputManager ().addMapping (BACKWARD, 
+              new KeyTrigger (Integer.valueOf(this.game.getSettings ()
+                .getString (BACKWARD).split (EVENT_SPLITTER)[1])));
+        this.game.getInputManager ().addListener (this, BACKWARD);
+        this.game.getInputManager ().addMapping (LEFT, 
+              new KeyTrigger (Integer.valueOf(this.game.getSettings ()
+                .getString (LEFT).split (EVENT_SPLITTER)[1])));
+        this.game.getInputManager ().addListener (this, LEFT);
+        this.game.getInputManager ().addMapping (RIGHT, 
+              new KeyTrigger (Integer.valueOf(this.game.getSettings ()
+                .getString (RIGHT).split (EVENT_SPLITTER)[1])));
+        this.game.getInputManager ().addListener (this, RIGHT);
+      }
+      else
+      {
+        this.game.getInputManager ().deleteMapping (FORWARD);
+        this.game.getInputManager ().deleteMapping (BACKWARD);
+        this.game.getInputManager ().deleteMapping (LEFT);
+        this.game.getInputManager ().deleteMapping (RIGHT);
+      }
+    }
+    catch (NullPointerException exception)
+    {
+      LOGGER.log (Level.FINE, "Tried to delete Non-existant", exception);
+    }
+  }
+  
+  /**
+   * What to set Click to Move to.
+   * 
+   * @param move whether to turn on Click To Move
+   */
+  public void setClickToMove (boolean move)
+  {
+    try
+    {
+      if (move)
+      {
+        this.game.getInputManager ().addMapping (CLICK_NAME, 
+              new MouseButtonTrigger (MouseInput.BUTTON_LEFT));
+        this.game.getInputManager ().addListener (this, CLICK_NAME);
+      }
+      else if (this.game.getInputManager ().hasMapping (CLICK_NAME))
+      {
+        this.game.getInputManager ().deleteMapping (CLICK_NAME);
+      }
+    }
+    catch (NullPointerException exception)
+    {
+      LOGGER.log (Level.FINE, "Tried to delete Non-existant", exception);
+    }
+  }
+  
+  /**
+   * Pause/unpause this State.
+   * 
+   * @param enable whether to enable this state.
+   */
+  @Override
+  public void setEnabled (boolean enable)
+  {
+    this.playerCam.setEnabled (enable);
+    
+    super.setEnabled (enable);
+  }
+  
+  /**
+   * update anything that is controlled by this state.
+   * 
+   * @param tpf the delta since the previous call to update.
+   */
+  @Override
+  public void update (float tpf)
+  {
+    Vector3f direction;
+    if (isEnabled ())
+    {
+      if (null != this.moveTo)
+      {
+        direction = moveTo.clone ();
+        direction.x -= this.player.getImage().getLocalTranslation ().x;
+        direction.y -= this.player.getImage().getLocalTranslation ().y;
+        direction.z -= this.player.getImage().getLocalTranslation ().z;
+        direction = direction.normalize ();
+        direction.x *= tpf * WALK_SPEED;
+        direction.y *= tpf * WALK_SPEED;
+        direction.z *= tpf * WALK_SPEED;
+        this.player.getImage().move (direction);
+        if (0.5f > this.player.getImage().getLocalTranslation ()
+                .distance (this.moveTo))
+        {
+          this.moveTo = null;
+        }
+      }
+      
+      this.playerCam.setLocalTranslation (
+              this.player.getImage().getLocalTranslation ().x, 
+              this.playerCam.getLocalTranslation ().y, 
+              this.player.getImage ().getLocalTranslation ().z);
+    }
+    
+    this.player.update (tpf);
+    
+    super.update (tpf);
+  }
+  
+  /**
+   * Called when an analog action that is registered with this state happens.
+   * 
+   * @param action name of action called.
+   * @param strength strength of the input signal, or tpf for boolean triggers.
+   * @param tpf the time since the last call of this action.
+   */
+  public void onAnalog (String action, float strength, float tpf)
+  {
+    if (isEnabled ())
+    {
+      if (CLICK_NAME.equals (action))
+      {
+        this.held += tpf;
+      }
+      else if (FORWARD.equals (action))
+      {
+        if (null == this.moveTo)
+        {
+          this.moveTo = this.player.getImage ().getLocalTranslation ().clone ();
+        }
+        this.moveTo.z = this.player.getImage ().getLocalTranslation ().z +
+                (STEP_SIZE * FORWARD_MOVE);
+      }
+      else if (BACKWARD.equals (action))
+      {
+        if (null == this.moveTo)
+        {
+          this.moveTo = this.player.getImage ().getLocalTranslation ().clone ();
+        }
+        this.moveTo.z = this.player.getImage ().getLocalTranslation ().z +
+                (STEP_SIZE * BACK_MOVE);
+      }
+      else if (LEFT.equals (action))
+      {
+        if (null == this.moveTo)
+        {
+          this.moveTo = this.player.getImage ().getLocalTranslation ().clone ();
+        }
+        this.moveTo.x = this.player.getImage ().getLocalTranslation ().x +
+                (STEP_SIZE * FORWARD_MOVE);
+      }
+      else if (RIGHT.equals (action))
+      {
+        if (null == this.moveTo)
+        {
+          this.moveTo = this.player.getImage ().getLocalTranslation ().clone ();
+        }
+        this.moveTo.x = this.player.getImage ().getLocalTranslation ().x +
+                (STEP_SIZE * BACK_MOVE);
+      }
+    }
+  }
+  /**
+   * Called when a boolean action that is registered with this state happens.
+   * 
+   * @param action name of action called.
+   * @param clicked false if the action is ongoing.
+   * @param tpf the time since the last call of this action.
+   */
+  public void onAction (String action, boolean clicked, float tpf)
+  {
+    CollisionResults results;
+    CollisionResult closest;
+    Ray ray;
+    Vector3f contact;
+    
+    if (isEnabled ())
+    {
+      if (CLICK_NAME.equals (action) && !clicked)
+      {
+        if (this.held < HOLD_AMOUNT)
+        {
+          results = new CollisionResults ();
+          /*
+           * This ray is using where the player clicked on screen in order to find
+           * a location on the terrain to use. This is quite useful for us.
+           */
+          ray = new Ray (this.game.getCamera ().getWorldCoordinates 
+                  (this.game.getInputManager ().getCursorPosition (), 0.0f), 
+                  this.game.getCamera ().getWorldCoordinates 
+                  (this.game.getInputManager ().getCursorPosition (), 0.3f)
+                  .subtractLocal (this.game.getCamera ().getWorldCoordinates 
+                  (this.game.getInputManager ().getCursorPosition (), 0.0f))
+                  .normalizeLocal ());
+          this.terrain.collideWith (ray, results);
+
+          if (results.size () > 0)
+          {
+            closest = results.getClosestCollision ();
+            contact = closest.getContactPoint ();
+            contact.y = this.player.getImage ().getLocalTranslation ().y;
+            this.moveTo = contact;
+          }
+        }
+
+        this.held = 0f;
+      }
+    }
+  }
+
+  public Game getGame ()
+  {
+    return game;
+  }
+
+  public WorldHolder getWorld ()
+  {
+    return world;
+  }
+}

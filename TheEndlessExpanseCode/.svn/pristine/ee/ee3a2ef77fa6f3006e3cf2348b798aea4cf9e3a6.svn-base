@@ -1,0 +1,23 @@
+package halemaster.ee.quest;
+
+/**
+ * @name ItemSet
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ * 
+ * NOTE: This is a PLACEHOLDER and will move in the future!
+ */
+public class ItemSet 
+{
+  public String getName ()
+  {
+    return "PLACEHOLDER";
+  }
+  
+  public int getAmount ()
+  {
+    return 10;
+  }
+}

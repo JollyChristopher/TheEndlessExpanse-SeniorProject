@@ -1,0 +1,274 @@
+package halemaster.ee.state;
+
+import com.jme3.app.Application;
+import com.jme3.app.state.AppStateManager;
+import de.lessvoid.nifty.NiftyEventSubscriber;
+import de.lessvoid.nifty.controls.Label;
+import de.lessvoid.nifty.controls.ListBox;
+import de.lessvoid.nifty.controls.ListBoxSelectionChangedEvent;
+import de.lessvoid.nifty.controls.Window;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.elements.render.ImageRenderer;
+import de.lessvoid.nifty.render.NiftyImage;
+import halemaster.ee.quest.Offer;
+import halemaster.ee.quest.Quest;
+import halemaster.ee.world.entity.Entity;
+import halemaster.ee.world.micro.AreaGenerator;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * @name Hud
+ * 
+ * @version 0.0.0
+ * 
+ * @date Oct 24, 2013
+ */
+public class Hud extends Menu
+{
+  public static final float TARGET_DISTANCE = 64f * AreaGenerator.TILE_WIDTH;
+  public static final String FILE = "Interface/menu/hud.xml";
+  public static final String ID = "hud";
+  private PlayerState player;
+  private Entity target;
+  private List<String> titles;
+  private List<String> descriptions;
+  
+  public Hud (PlayerState player)
+  {
+    super (FILE, ID);
+    
+    this.player = player;
+  }
+  
+  /**
+   * Initialize this menu.
+   * 
+   * @param manager manager to initialize with.
+   * @param app application to initialize with.
+   */
+  @Override
+  public void initialize (AppStateManager manager, Application app)
+  {
+    Label playerName;
+    Element playerImage;
+    Window characterWindow, invWindow, questWindow, chatWindow;
+    NiftyImage playerNiftyImage;
+    Element characterImage;
+    Element targetPanel;
+    ListBox quests;
+    
+    super.initialize (manager, app);
+    
+    playerName = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("player_name", Label.class);
+    playerImage = getNifty ().getCurrentScreen ().findElementByName 
+            ("player_image");
+    characterImage = getNifty ().getCurrentScreen ().findElementByName 
+            ("window_character_player_image");
+    characterWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_character", Window.class);
+    invWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_inventory", Window.class);
+    questWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_quest", Window.class);
+    chatWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_chat", Window.class);
+    quests = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("questLog", ListBox.class);
+    targetPanel = getNifty ().getCurrentScreen ().findElementByName ("target");
+    playerNiftyImage = getNifty ()
+            .createImage (this.player.getPlayerImage (), false);
+    
+    targetPanel.hide ();
+    
+    playerName.setText (this.player.getPlayerName ());
+    playerImage.getRenderer (ImageRenderer.class).setImage (playerNiftyImage); 
+    characterImage.getRenderer (ImageRenderer.class).setImage (playerNiftyImage); 
+    characterWindow.getElement ().hide ();
+    characterWindow.setTitle (this.player.getPlayerName ());
+    invWindow.getElement ().hide ();
+    questWindow.getElement ().hide ();
+    chatWindow.getElement ().hide ();
+    for (int i = 0; i < 20; i++)
+    {
+      quests.addItem ("Quest " + i);
+    }
+  }
+  
+  /**
+   * Updates the hud with new information, if any exists.
+   */
+  public void update ()
+  {
+    ListBox questList = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("questLog", ListBox.class);
+    Label title, description;
+    
+    if (null != this.target && this.target.getAbsoluteLocation ()
+            .distance (this.player.getPlayer ().getAbsoluteLocation ())
+            > TARGET_DISTANCE)
+    {
+      setTarget (null);
+    }
+    
+    if (this.player.questChanged ())
+    {
+      questList.clear ();
+      this.titles = new ArrayList<String> ();
+      this.descriptions = new ArrayList<String> ();
+      for (Quest quest : this.player.getQuests ())
+      {
+        questList.addItem (Offer.getOffer (quest.getOfferId (), null).getTitle ());
+        this.titles.add (Offer.getOffer (quest.getOfferId (), null).getTitle ());
+        this.descriptions.add (Offer.getOffer (quest.getOfferId (), null)
+                .getDescription ());
+      }
+      title = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("currentQuestTitle", Label.class);
+      description = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("currentQuestDescription", Label.class);
+      if (this.titles.size () > 0 && this.descriptions.size () > 0)
+      {
+        questList.selectItemByIndex (0);
+        title.setText (this.titles.get (0));
+        description.setText (this.descriptions.get (0));
+      }
+    }
+  }
+  
+  /**
+   * toggle opening of the character window
+   * 
+   * @return whether the input event was used up
+   */
+  public boolean openCharacter ()
+  {
+    Element characterWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_character", Window.class).getElement ();
+    
+    
+    if (characterWindow.isVisible ())
+    {
+      characterWindow.hide ();
+    }
+    else
+    {
+      characterWindow.show ();
+    }
+    
+    return true;
+  }
+  
+  /**
+   * toggle opening of the inventory window
+   * 
+   * @return whether the input event was used up
+   */
+  public boolean openInventory ()
+  {
+    Element inventoryWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_inventory", Window.class).getElement ();
+    
+    
+    if (inventoryWindow.isVisible ())
+    {
+      inventoryWindow.hide ();
+    }
+    else
+    {
+      inventoryWindow.show ();
+    }
+    
+    return true;
+  }
+  
+  /**
+   * toggle opening of the quest log window
+   * 
+   * @return whether the input event was used up
+   */
+  public boolean openQuestLog ()
+  {
+    Element questWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_quest", Window.class).getElement ();
+    
+    if (questWindow.isVisible ())
+    {
+      questWindow.hide ();
+    }
+    else
+    {
+      questWindow.show ();
+    }
+    
+    return true;
+  }
+  
+  public void startChat (String title, String description)
+  {
+    Window chatWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_chat", Window.class);
+    Label chatDesc = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("chat_description", Label.class);
+    
+    chatWindow.setTitle (title);
+    chatDesc.setText (description);
+    chatWindow.getElement ().show ();
+  }
+  
+  /**
+   * Set the target in the HUD
+   * @param target the target in the hud
+   */
+  public void setTarget (Entity target)
+  {
+    Element targetPanel;
+    Label targetName;
+    Element targetImage;
+    NiftyImage targetNiftyImage;
+    
+    this.target = target;
+    
+    targetPanel = getNifty ().getCurrentScreen ().findElementByName ("target");
+    
+    if (null == this.target)
+    {
+      targetPanel.hide ();
+    }
+    else
+    {
+      targetPanel.show ();
+      
+      targetName = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("target_name", Label.class);
+      targetImage = getNifty ().getCurrentScreen ().findElementByName 
+            ("target_image");
+      targetNiftyImage = getNifty ()
+            .createImage (this.target.getBasicImage (), false);
+      
+      targetName.setText (this.target.getName ());
+      targetImage.getRenderer (ImageRenderer.class).setImage (targetNiftyImage); 
+    }
+  }
+  
+  @NiftyEventSubscriber (id="questLog")
+  public void onQuestLogChanged (final String id, 
+          final ListBoxSelectionChangedEvent<String> event)
+  {
+    Label title, description;
+    List<Integer> selections = event.getSelectionIndices ();
+    Integer selection;
+    
+    if (selections.size () > 0)
+    {
+      selection = selections.get (0);
+      title = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("currentQuestTitle", Label.class);
+      description = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("currentQuestDescription", Label.class);
+      title.setText (this.titles.get (selection));
+      description.setText (this.descriptions.get (selection));
+    }
+  }
+}

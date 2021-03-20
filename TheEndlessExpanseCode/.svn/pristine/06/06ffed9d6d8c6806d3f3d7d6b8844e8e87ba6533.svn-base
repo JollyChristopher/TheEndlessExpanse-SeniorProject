@@ -1,0 +1,69 @@
+game.title=The Endless Expanse
+
+game.menu.play=Play
+game.menu.back=Back
+game.menu.new=New
+game.menu.delete=Delete
+game.menu.create=Create
+game.menu.name=Name
+game.menu.save=Save
+game.menu.seed=Seed
+
+game.menu.worlds=Worlds
+game.menu.worlds.new=Create New World
+game.menu.characters=Characters
+game.menu.characters.new=Create New Character
+
+game.menu.options=Options
+
+game.menu.options.video=Video
+game.menu.options.video.fullScreen=Full Screen
+game.menu.options.video.vSync=Vertical Sync
+game.menu.options.video.width=Screen Width
+game.menu.options.video.height=Screen Height
+
+game.menu.options.sound=Sound
+
+game.menu.options.control=Controls
+game.menu.options.control.click=Click to Move
+game.menu.options.control.forward=Forward
+game.menu.options.control.back=Backward
+game.menu.options.control.left=Turn Left
+game.menu.options.control.right=Turn Right
+game.menu.options.control.strafe.left=Strafe Left
+game.menu.options.control.strafe.right=Strafe Right
+
+game.world.create.land=Shifting Tectonic Plates
+game.world.create.temp=Adding Ice
+game.world.create.rain=Placing Clouds
+game.world.create.biome=Making Pretty Colors
+game.world.create.file=Finding a Place in the Universe
+game.world.create.done=Built a World!
+
+game.hud.inventory=Inventory
+game.hud.chat.friendly=Hello {0}, how are you today?
+
+game.level=Level:
+game.level.explain=This is a measure of how powerful the character is.
+game.xp=XP:
+game.xp.explain=You gain this for defeating foes and completing quest.\nRaise it to 100 to gain a level.\nHigher level opponents grant more xp.
+game.points=Stat Points:
+game.points.explain=You gain this when leveling up.\nLeft click on Power, Agility, or Intellect to upgrade.
+game.health=Health:
+game.health.explain=This is how healthy you are.\nWhen it reaches 0, you die.
+game.power=Power:
+game.power.explain=Power is a measure of your physical prowess.\nIncreases melee damage and Armor.
+game.agility=Agility:
+game.agility.explain=Agility is a measure of your dexterity.\nIncreases ranged damage and Accuracy.
+game.intellect=Intellect:
+game.intellect.explain=Intellect is a measure of your smarts.\nIncreases magik damage and Craft.
+game.armor=Armor:
+game.armor.explain=Armor is how well you reflect damage.\nIs increased by Power.
+game.craft=Craft:
+game.craft.explain=Craft is how effective your item usage is.\nIs increased by Intellect.
+game.damage=Damage:
+game.damage.explain=This is how much damage you deal on a normal attack.\nThis can be increased by Power, Agility, or Intellect based upon equipped weapon.\nPower increases melee weapons, Agility increases ranged weapons, and Intellect increases magik weapons.
+game.accuracy=Accuracy:
+game.accuracy.explain=Accuracy is how well you can hit.\nIs increased by Agility and Level.\nHigher level opponents are harder to hit.
+game.critical=Critical:
+game.critical.explain=Critical determines how likely you are to get a double damage strike.

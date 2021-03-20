@@ -1,0 +1,14 @@
+package halemaster.ee.item;
+
+/**
+ * @name InventoryListener
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 30, 2014
+ */
+public interface InventoryListener 
+{
+  public void pickupItem (Item item, int amount);
+  public void loseItem (Item item, int amount);
+}

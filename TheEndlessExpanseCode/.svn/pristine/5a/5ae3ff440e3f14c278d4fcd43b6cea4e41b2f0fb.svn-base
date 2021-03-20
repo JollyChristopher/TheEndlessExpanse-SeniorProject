@@ -1,0 +1,205 @@
+package halemaster.ee.item;
+
+import halemaster.ee.Game;
+import halemaster.ee.ai.AutoAttackAI;
+import halemaster.ee.world.entity.Entity;
+import halemaster.ee.world.entity.Statistic;
+
+/**
+ * @name Inventory
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 27, 2014
+ */
+public class Inventory 
+{
+  public enum Equipment
+  {
+    MAIN_HAND,
+    OFF_HAND,
+    BODY,
+    HELM,
+    BELT,
+    GLOVES,
+    BOOTS,
+    LEGS,
+    ACCESSORY;
+  }
+  
+  private ItemSet[][] items;
+  private ItemSet[] equipment;
+  private int money;
+  private Entity owner;
+          
+  public Inventory ()
+  {
+    // default constructor used for reflection
+  }
+  
+  public Inventory (int width, int height, Entity owner)
+  {
+    this.items = new ItemSet[width][height];
+    this.equipment = new ItemSet[Equipment.values ().length];
+    this.money = 0;
+    this.owner = owner;
+  }
+  
+  public void update (float tpf)
+  {
+    for (int x = 0; x < this.items.length; x++)
+    {
+      for (int y = 0; y < this.items[x].length; y++)
+      {
+        if (this.items[x][y] != null && this.items[x][y].getAmount () <= 0)
+        {
+          this.items[x][y] = null;
+        }
+      }
+    }
+  }
+  
+  public int getMoney ()
+  {
+    return this.money;
+  }
+  
+  public void addMoney (int money)
+  {
+    this.money += money;
+  }
+  
+  public boolean spendMoney (int money)
+  {
+    boolean spent = false;
+    if (this.money >= money)
+    {
+      addMoney (-money);
+      spent = true;
+    }
+    return spent;
+  }
+  
+  public ItemSet getItem (int x, int y)
+  {
+    return this.items[x][y];
+  }
+  
+  public ItemSet takeItem (int x, int y)
+  {
+    ItemSet item = this.items[x][y];
+    this.items[x][y] = null;
+    return item;
+  }
+  
+  public ItemSet splitItem (int x, int y)
+  {
+    ItemSet item = new ItemSet ();
+    ItemSet orig = this.items[x][y];
+    item.setItem (orig.getItem ());
+    item.setAmount (orig.getAmount () / 2);
+    orig.setAmount (orig.getAmount () - item.getAmount ());    
+    return item;
+  }
+  
+  public void putItem (int x, int y, ItemSet item)
+  {
+    if (null == this.items[x][y])
+    {
+      this.items[x][y] = item;
+    }
+  }
+  
+  public void swapItems (int x1, int y1, int x2, int y2)
+  {
+    ItemSet temp1 = this.items[x1][y1];
+    ItemSet temp2 = this.items[x2][y2];
+    if (null != temp1 && null != temp2 && 
+            temp1.getItem ().equals (temp2.getItem ()))
+    {
+      temp1.setAmount (temp1.getAmount () + temp2.getAmount ());
+      this.items[x2][y2] = null;
+    }
+    else
+    {
+      this.items[x1][y1] = temp2;
+      this.items[x2][y2] = temp1;
+    }
+  }
+  
+  public void useItem (int x, int y)
+  {
+    ItemSet item = this.items[x][y];
+    
+    if (null != item)
+    {
+      this.owner.use (item, ((AutoAttackAI) (this.owner.getAI 
+              (Game.AUTO_ATTACK_AI))).getTarget ());
+    }
+  }
+  
+  public ItemSet getEquip (Equipment equip)
+  {
+    return this.equipment[equip.ordinal ()];
+  }
+  
+  public void setEquip (Equipment equip, ItemSet item)
+  {
+    this.equipment[equip.ordinal ()] = item;
+  }
+  
+  public ItemSet takeEquip (Equipment equip)
+  {
+    ItemSet eq = this.equipment[equip.ordinal ()];
+    this.equipment[equip.ordinal ()] = null;
+    return eq;
+  }
+  
+  public int getEquipStat (Statistic stat)
+  {
+    int value = 0;
+    
+    for (int i = 0; i < this.equipment.length; i++)
+    {
+      if (null != this.equipment[i])
+      {
+        value += this.equipment[i].getItem ().getStatValueOnEquip (stat);
+      }
+    }
+    
+    return value;
+  }
+  
+  public boolean addItem (ItemSet item)
+  {
+    boolean added = false;
+    
+    for (int x = 0; !added && x < this.items.length; x++)
+    {
+      for (int y = 0; !added && y < this.items[x].length; y++)
+      {
+        if (null != this.items[x][y] &&
+                this.items[x][y].getItem ().equals (item.getItem ()))
+        {
+          this.items[x][y].setAmount (this.items[x][y].getAmount () + 
+                  item.getAmount ());
+          added = true;
+        }
+      }
+    }
+    
+    for (int x = 0; !added && x < this.items.length; x++)
+    {
+      for (int y = 0; !added && y < this.items[x].length; y++)
+      {
+        if (null == this.items[x][y])
+        {
+          this.items[x][y] = item;
+          added = true;
+        }
+      }
+    }
+    
+    return added;
+  }
+}

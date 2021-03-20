@@ -1,0 +1,134 @@
+package halemaster.ee.world.history.event;
+
+import halemaster.ee.Game;
+import halemaster.ee.Json;
+import halemaster.ee.state.PlayerState;
+import halemaster.ee.world.Area;
+import halemaster.ee.world.history.event.type.EventType;
+import halemaster.ee.world.history.event.type.EventTypeHolder;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
+
+/**
+ * @name EventIO
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class EventIO 
+{
+  /**
+   * Get the types from the Json file.
+   * 
+   * @param file file to get types from.
+   * @return all types as an array.
+   * @throws IOException 
+   */
+  public static EventType[] getTypes (File file) throws IOException
+  {
+    return Json.getFromFile (file, EventType.class);
+  }
+  
+  public static EventHolder getEvents (String world, EventHolder holder,
+          EventTypeHolder[] types, int left, int right, int top, int bottom) 
+          throws IOException, InstantiationException, IllegalAccessException
+  {
+    File areaFolder = new File (Game.HOME + Game.GAME_FOLDER + 
+            Game.WORLD_FOLDER  + "/" + world + PlayerState.LOCATION_FOLDER);
+    File anywhereFile = new File (Game.HOME + Game.GAME_FOLDER + 
+            Game.WORLD_FOLDER  + "/" + world + "/anywhere.history");
+    Event[] anywhereEvents = Json.getFromFile (anywhereFile, Event.class);
+    Event[] areaEvents;
+    if (holder == null)
+    {
+      holder = new EventHolder (world);
+    }
+    
+    for (int i = 0; i < types.length; i++)
+    {
+      holder.addTypeHolder (types[i]);
+    }
+    
+    for (int i = 0; i < anywhereEvents.length; i++)
+    {
+      anywhereEvents[i].shake ();
+      anywhereEvents[i].setHolder (holder);
+      holder.addEvent (anywhereEvents[i], anywhereEvents[i].getLock ());
+    }
+    
+    for (File areaFile : areaFolder.listFiles ())
+    {
+      String name = areaFile.getName ();
+      if (name.split (".")[1].equals("history"))
+      {
+        name = name.split (".")[0];
+        int x = Integer.valueOf (name.split (",")[0]);
+        int y = Integer.valueOf (name.split (",")[1]);
+
+        if (x >= left && x <= right && y >= top && y <= bottom)
+        {
+          areaEvents = Json.getFromFile (areaFile, Event.class);
+          for (int i = 0; i < areaEvents.length; i++)
+          {
+            areaEvents[i].shake ();
+            areaEvents[i].setHolder (holder);
+            holder.addEvent (areaEvents[i], areaEvents[i].getLock ());
+          }
+        }
+      }
+    }
+    
+    return holder;
+  }
+  
+  public static void saveEvents (EventHolder holder, String name) throws 
+          IOException
+  {
+    Event[] inOrderEvents;
+    List<Event> anywhereEvents = new ArrayList<Event> ();
+    HashMap<Area, List<Event>> areaEvents = new HashMap<Area, List<Event>>();
+    File areaFile = new File (Game.HOME + Game.GAME_FOLDER + 
+            Game.WORLD_FOLDER  + "/" + name + PlayerState.LOCATION_FOLDER);
+    File anywhereFile = new File (Game.HOME + Game.GAME_FOLDER + 
+            Game.WORLD_FOLDER  + "/" + name + "/anywhere.history");
+    
+    inOrderEvents = holder.getEvents (0, Integer.MAX_VALUE, 0, 
+            Integer.MAX_VALUE, 0, Integer.MAX_VALUE);
+    areaFile.mkdir ();
+    
+    for (int i = 0; i < inOrderEvents.length; i++)
+    {
+      inOrderEvents[i].unShake ();
+      if (Area.ANYWHERE.equals (inOrderEvents[i].getLocation ()))
+      {
+        anywhereEvents.add (inOrderEvents[i]);
+      }
+      else
+      {
+        if (!areaEvents.containsKey (inOrderEvents[i].getLocation ()))
+        {
+          areaEvents.put (inOrderEvents[i].getLocation (), 
+                  new ArrayList<Event>());
+        }
+        areaEvents.get (inOrderEvents[i].getLocation ()).add (inOrderEvents[i]);
+      }
+    }
+    
+    Json.saveJson (anywhereFile, anywhereEvents);
+    
+    for (Entry<Area, List<Event>> tempEvents : areaEvents.entrySet ())
+    {
+      areaFile = new File (Game.HOME + Game.GAME_FOLDER + 
+            Game.WORLD_FOLDER  + "/" + name + PlayerState.LOCATION_FOLDER + "/"
+              + tempEvents.getKey ().getX () + "," + 
+              tempEvents.getKey ().getY () + ".history");
+      
+      Json.saveJson (areaFile, tempEvents.getValue ());
+    }
+  }
+}

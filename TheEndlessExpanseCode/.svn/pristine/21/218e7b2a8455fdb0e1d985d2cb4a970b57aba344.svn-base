@@ -1,0 +1,16 @@
+{"name":"Some Json", id:12345, color:[0, 0, 0], stuff:[{"name":"hi"},{"name":"not hi"}]}
+{
+  "name":"Some Json", 
+  id:12345, 
+  color:[
+    0, 0, 0
+  ], 
+  stuff:[
+    {
+      "name":"hi"
+    },
+    {
+      "name":"not hi"
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+package halemaster.ee;
+
+import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AppState;
+import com.jme3.input.KeyInput;
+import com.jme3.system.AppSettings;
+import com.jme3.system.JmeSystem;
+import halemaster.ee.localization.Localizer;
+import halemaster.ee.state.PlayerState;
+import halemaster.ee.state.start.MenuStart;
+import halemaster.ee.world.BiomeClassifier;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+
+/**
+ * @name Game
+ * 
+ * @version 0.0.0
+ * 
+ * @date 2013-10-12
+ */
+@SuppressWarnings ("ClassWithMultipleLoggers")
+public class Game extends SimpleApplication
+{
+  public static final Logger LOGGER_ALL = Logger.getLogger ("");
+  public static final Logger LOGGER = Logger.getLogger (Game.class.getName ());
+  public static final String DEBUG = "--debug";
+  public static final String GAME_FOLDER = "/.endlessExpanse";
+  public static final String WORLD_FOLDER = "/worlds";
+  public static final String PLAYER_FOLDER = "/players";
+  public static final String VERSION = "0.0.0";
+  public static final String SETTINGS = "halemaster.ee.Settings";
+  public static final String HOME = 
+          JmeSystem.getStorageFolder ().getAbsolutePath ();
+  
+  /**
+   * Main class for the entire game. Runs on startup.
+   * 
+   * @param args Arguments passed to the game.
+   */
+  public static void main (String[] args)
+  {
+    Game application;
+    AppSettings settings = new AppSettings (true);
+    boolean debug = false;
+    
+    for (String arg : args)
+    {
+      if (DEBUG.equals (arg))
+      {
+        debug = true;
+      }
+    }
+    
+    application = new Game (debug);
+         
+    settings.putBoolean (PlayerState.CLICK_NAME, true);
+    settings.putString (PlayerState.FORWARD, "W" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_W);
+    settings.putString (PlayerState.BACKWARD, "S" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_S);
+    settings.putString (PlayerState.LEFT, "A" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_A);
+    settings.putString (PlayerState.RIGHT, "D" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_D);
+    settings.putString (PlayerState.STRAFE_LEFT, "Q" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_Q);
+    settings.putString (PlayerState.STRAFE_RIGHT, "E" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_E);
+    
+    try
+    {
+      settings.load(Game.SETTINGS);
+    }
+    catch (BackingStoreException exception)
+    {
+      LOGGER.log (Level.WARNING, "Failed to load settings", exception);
+    }    
+    
+    settings.setTitle(Localizer.getString ("game.title"));
+    application.setSettings (settings);
+    
+    application.start ();
+  }
+  
+  public Game ()
+  {
+    this (false);
+  }
+  
+  public Game (boolean debugInitial)
+  {
+    setDebug (debugInitial);    
+  }
+
+  /**
+   * Initialization of the game. Get rid of default debug info.
+   */
+  @Override
+  public void simpleInitApp ()
+  {
+    AppSettings apps = this.settings;
+    
+    this.flyCam.setEnabled (false);
+    
+    apps.setRenderer (AppSettings.LWJGL_OPENGL_ANY);
+    apps.setEmulateMouse (true);
+    apps.setEmulateMouseFlipAxis (false, false);
+    
+    setSettings (apps);
+    restart ();
+    
+    try
+    {
+      BiomeClassifier.loadBiomes ("src/halemaster/ee/world/mainBiomes");
+
+      addAppState (new MenuStart ());
+    }
+    catch (IOException e)
+    {
+      handleError ("Could not load Biomes. Make sure they are in the correct"
+              + "package!", e);
+    }
+  }
+  
+  @Override
+  public void simpleUpdate (float tpf)
+  {
+  }
+  
+  /**
+   * Handles any errors that are thrown to the Game.
+   * 
+   * @param errorMessage Message thrown to the Game.
+   * @param thrown Throwable that was thrown to the Game.
+   */
+  @Override
+  public void handleError (String errorMessage, Throwable thrown)
+  {
+    LOGGER.log (Level.SEVERE, errorMessage, thrown);
+    stop ();
+  }
+  
+  /**
+   * Turn Debugging on or off.
+   * 
+   * @param debug what to turn debugging to.
+   */
+  public final void setDebug (boolean debug)
+  {
+    setDisplayFps (debug);
+    setDisplayStatView (debug);
+    setShowSettings (debug);
+    if (debug)
+    {
+      LOGGER_ALL.setLevel (Level.ALL);
+    }
+    else
+    {
+      LOGGER_ALL.setLevel (Level.SEVERE);
+    }
+  }
+  
+  /**
+   * Add the given app state to the game.
+   * 
+   * @param state the state to add.
+   */
+  public void addAppState (AppState state)
+  {
+    this.stateManager.attach (state);
+  }
+  
+  /**
+   * remove the given app state from the game.
+   * 
+   * @param state the state to remove.
+   * @return whether the state was removed successfully.
+   */
+  public boolean removeAppState (AppState state)
+  {
+    return this.stateManager.detach (state);
+  }
+  
+  public AppSettings getSettings ()
+  {
+    return this.settings;
+  }
+}

@@ -1,0 +1,327 @@
+package halemaster.ee.quest;
+
+import halemaster.ee.Game;
+import halemaster.ee.Json;
+import halemaster.ee.world.Biome;
+import halemaster.ee.world.entity.Entity;
+import halemaster.ee.world.entity.EntityGenerator;
+import halemaster.ee.world.entity.Monster;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+
+/**
+ * @name Offer
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ */
+public class Offer 
+{
+  public static final String WORLD_SEPARATOR = ";";
+  public static final String OFFER_SEPARATOR = ",";
+  public static final String OFFER_FOLDER = "offers";
+  public static final String OFFER_CURRENT = "currentOffer";
+  public static final String OFFER_LIST = "possibleOffers";
+  public static final int MAX_KILL = 20;
+  private static Map<String, Map<String, Offer>> loadedOffers = 
+          new HashMap<String, Map<String, Offer>>();
+  
+  private transient Entity npc;
+  private String offerId;
+  private String turnIn;
+  private Reward reward;
+  private Requirement requirements;
+  private int offerRate;
+  private Map<String, Integer> offered;
+
+  public Entity getNpc ()
+  {
+    return npc;
+  }
+
+  public String getOfferId ()
+  {
+    return offerId;
+  }
+
+  public String getTurnIn ()
+  {
+    return turnIn;
+  }
+
+  public Reward getReward ()
+  {
+    return reward;
+  }
+
+  public Requirement getRequirements ()
+  {
+    return requirements;
+  }
+
+  public int getOfferRate ()
+  {
+    return offerRate;
+  }
+  
+  public int getOfferAmount (String playerName)
+  {
+    return this.offered.get (playerName);
+  }
+  
+  /**
+   * Finish the quest for the given player
+   * @param playerName name of the player
+   * @return the reward for the quest
+   */
+  public Reward finishQuest (String playerName)
+  {
+    if (this.offered.containsKey (playerName))
+    {
+      this.offered.put (playerName, this.offered.get (playerName) + 1);
+    }
+    else
+    {
+      this.offered.put (playerName, 1);
+    }
+    
+    return this.reward;
+  }
+  
+  /**
+   * Get the offer with the given id if in memory.
+   * @param id id of offer
+   * @return Offer with the given id
+   */
+  public static Offer getOffer (String id)
+  {
+    String world = id.split (WORLD_SEPARATOR)[0];
+    String unique = id.split (WORLD_SEPARATOR)[1];
+    Map<String, Offer> worldOffers = loadedOffers.get (world);
+    Offer offer = null;
+    
+    if (null != worldOffers)
+    {
+      offer = worldOffers.get (unique);
+    }
+    
+    return offer;
+  }
+
+  /**
+   * Load the given Offer for the entity.
+   * @param id id of offer to load
+   * @param entity entity to load offer into
+   * @return Offer loaded. This is stored into recently loaded offers as well.
+   */
+  public static Offer loadOffer (String id, Entity entity)
+  {
+    String world = id.split (WORLD_SEPARATOR)[0];
+    String unique = id.split (WORLD_SEPARATOR)[1];
+    Map<String, Offer> worldOffers = loadedOffers.get (world);
+    Offer offer;
+    
+    if (null == worldOffers)
+    {
+      worldOffers = new HashMap<String, Offer>();
+      loadedOffers.put (world, worldOffers);
+    }
+    
+    offer = worldOffers.get (unique);
+    
+    if (null == offer)
+    {
+      try
+      {
+        offer = Json.getFromFile (new File (Game.GAME_FOLDER + 
+                Game.WORLD_FOLDER + "/" + world + OFFER_FOLDER + "/" + 
+                unique), Offer.class)[0];
+        offer.npc = entity;
+        worldOffers.put (unique, offer);
+      }
+      catch (IOException e)
+      {
+        // log
+      }
+    }
+    
+    return getOffer (id);
+  }
+
+  /**
+   * Save the offer to file.
+   * @param offer offer to save
+   */
+  public static void saveOffer (Offer offer)
+  {
+    String world = offer.offerId.split (WORLD_SEPARATOR)[0];
+    String unique = offer.offerId.split (WORLD_SEPARATOR)[1];
+    
+      try
+      {
+        Json.saveJson (new File (Game.GAME_FOLDER + 
+                Game.WORLD_FOLDER + "/" + world + OFFER_FOLDER + "/" + 
+                unique), offer);
+      }
+      catch (IOException e)
+      {
+        // log
+      }
+  }
+
+  /**
+   * Create a brand new offer
+   * @param template template to base offer on
+   * @param npc npc who offers
+   * @param biome biome the npc is at
+   * @param otherCreatures other entities nearby the npc, sans any players
+   * @param random random generator to use
+   * @return the offer created
+   */
+  public static Offer newOffer (QuestTemplate template, Entity npc, Biome biome,
+          List<Entity> otherCreatures, Random random)
+  {
+    Offer offer = new Offer ();
+    Requirement reqs = new Requirement ();
+    List<Monster> monsters = Monster.getForBiome (biome);
+    int count;
+    
+    offer.npc = npc;
+    offer.offerRate = template.getOfferRate ();
+    offer.offered = new HashMap<String, Integer> ();
+    offer.reward = new Reward ();
+    
+    for (Entry<String, Integer[]> kill : template.getKill ().entrySet ())
+    {
+      for (Integer amount : kill.getValue ())
+      {
+        count = amount;
+        if (count <= 0)
+        {
+          count = random.nextInt (MAX_KILL) + 1;
+        }
+        if (QuestTemplate.ANY.equals (kill.getKey ()))
+        {
+          reqs.addKill (monsters.get (random.nextInt (monsters.size ()))
+                  .getName (), count);
+        }
+        else
+        {
+          reqs.addKill (kill.getKey (), count);
+        }
+      }
+    }
+    
+    List<String> jobs = Arrays.asList(template.getTalk ()
+            .get (npc.getData (EntityGenerator.NPC_CAREER)));
+    String nextJob = jobs.get (random.nextInt (jobs.size ()));
+    boolean foundCurrent;
+    
+    while (reqs.getTalkNames ().length < template.getTalkCount ())
+    {
+      foundCurrent = false;
+      for (int i = 0; !foundCurrent && i < otherCreatures.size (); i++)
+      {
+        if (nextJob.equals (QuestTemplate.ANY) && null != otherCreatures.get (i)
+                .getData (EntityGenerator.NPC_CAREER))
+        {
+          reqs.addTalk (otherCreatures.get (i).getName ());
+        }
+        else if (nextJob.equals (otherCreatures.get (i)
+                .getData (EntityGenerator.NPC_CAREER)))
+        {
+          reqs.addTalk (otherCreatures.get (i).getName ());
+        }
+      }
+      if (!foundCurrent)
+      {
+        jobs.remove (nextJob);
+      }
+      
+      nextJob = jobs.get (random.nextInt (jobs.size ()));
+    }
+    
+    offer.requirements = reqs;
+    
+    String[] turnInPossible = template.getTurnIn ();
+    for (int i = 0; offer.turnIn == null && i < turnInPossible.length; i++)
+    {
+      if (QuestTemplate.SELF.equals (turnInPossible[i]))
+      {
+        offer.turnIn = QuestTemplate.SELF;
+      }
+      else if (QuestTemplate.INSTANT.equals (turnInPossible[i]))
+      {
+        offer.turnIn = QuestTemplate.INSTANT;
+      }
+      else
+      {
+        for (int j = 0; null == offer.turnIn && j < otherCreatures.size (); j++)
+        {
+          if (turnInPossible[i].equals (QuestTemplate.ANY) && 
+                  null != otherCreatures
+                  .get (j).getData (EntityGenerator.NPC_CAREER))
+          {
+            offer.turnIn = otherCreatures.get (j).getName ();
+          }
+          else if (turnInPossible[i].equals (otherCreatures.get (j)
+                  .getData (EntityGenerator.NPC_CAREER)))
+          {
+            offer.turnIn = otherCreatures.get (j).getName ();
+          }
+        }
+      }
+    }
+    
+    offer.offerId = npc.getHolder ().getHolder ().getEvents ().getWorldName ()
+            + WORLD_SEPARATOR + npc.getName ();
+    for (String items : reqs.getItemNames ())
+    {
+      offer.offerId += items;
+    }
+    for (String kills : reqs.getKillNames ())
+    {
+      offer.offerId += kills;
+    }
+    for (String talk : reqs.getTalkNames ())
+    {
+      offer.offerId += talk;
+    }
+    
+    Map<String, Offer> worldOffers = loadedOffers.get (npc.getHolder ()
+            .getHolder ().getEvents ().getWorldName ());
+    if (null == worldOffers)
+    {
+      worldOffers = new HashMap<String, Offer> ();
+      loadedOffers.put (npc.getHolder ()
+            .getHolder ().getEvents ().getWorldName (), worldOffers);
+    }
+    
+    worldOffers.put (offer.offerId.split (WORLD_SEPARATOR)[1], offer);
+    
+    return getOffer (offer.offerId);
+  }
+
+  /**
+   * Clears all offers, saving them one by one
+   */
+  public static void clearOffers ()
+  {
+    for (Map<String, Offer> world : loadedOffers.values ())
+    {
+      for (Offer offer : world.values ())
+      {
+        saveOffer (offer);
+      }
+    }
+    
+    loadedOffers.clear ();
+  }
+}

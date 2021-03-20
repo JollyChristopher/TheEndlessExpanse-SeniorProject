@@ -1,0 +1,115 @@
+package halemaster.ee;
+
+import com.jme3.asset.AssetManager;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState;
+import com.jme3.renderer.queue.RenderQueue;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
+import com.jme3.scene.shape.Box;
+import com.jme3.texture.Texture;
+import com.jme3.texture.Texture2D;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @name Sprite
+ * 
+ * @version 0.0.0
+ * 
+ * @date Jan 28, 2014
+ */
+public class Sprite 
+{
+  public static final float DEFAULT_SIZE = 20f;
+  public static final int DEFAULT_BOX = 32;
+  private static Map<String, Material> materials = new HashMap<String, Material>();
+  private static Box spriteBox = new Box(DEFAULT_SIZE,0.001f,DEFAULT_SIZE);
+  private float fps;
+  private float passed = fps;
+  private int next = 1;
+  private Texture[] textures;
+  private Geometry image;
+  
+  public Sprite (String name, AssetManager manager, float fps, int layer,
+          String ... textures)
+  {
+    this (name, manager, fps, layer, DEFAULT_BOX, DEFAULT_BOX, textures);
+  }
+  
+  public Sprite (String name, AssetManager manager, float fps, int layer,
+          int width, int height, String ... textures)
+  {
+    Material spriteMat;
+    Box usedBox = spriteBox;
+    
+    this.fps = fps;
+    
+    this.textures = new Texture2D[textures.length];
+    for (int i = 0; i < this.textures.length; i++)
+    {
+      this.textures[i] = manager.loadTexture(textures[i]);
+    }
+    
+    if (width != DEFAULT_BOX || height != DEFAULT_BOX)
+    {
+      usedBox = new Box(DEFAULT_SIZE * (width / DEFAULT_BOX),0.001f,
+              DEFAULT_SIZE * (height / DEFAULT_BOX));
+    }
+    
+    spriteMat = materials.get (name);
+    if (null == spriteMat)
+    {
+      spriteMat = new Material(manager, "Common/MatDefs/Misc/Unshaded.j3md");
+      spriteMat.setTexture ("ColorMap", this.textures[0]);
+      spriteMat.getAdditionalRenderState().setBlendMode
+              (RenderState.BlendMode.Alpha);
+      materials.put (name, spriteMat);
+    }
+    this.image = new Geometry(name, usedBox);
+    this.image.setQueueBucket(RenderQueue.Bucket.Transparent);
+    this.image.setMaterial(spriteMat);
+    this.image.rotate (0f, (float) (3 * Math.PI / 2), 0f);
+    this.image.move (0, layer / 10.0f, 0);
+    this.image.scale ((float) (1));
+  }
+  
+  public void move (float x, float y)
+  {
+    this.image.move (x, 0, y);
+  }
+  
+  public void update (float tpf)
+  {
+    if (this.textures.length > 1)
+    {
+      this.passed += tpf;
+      if (this.passed > 1.0f / this.fps)
+      {
+        this.image.getMaterial ().setTexture ("ColorMap", this.textures[this.next]);
+        this.next++;
+        if (this.next >= this.textures.length)
+        {
+          this.next = 0;
+        }
+
+        this.passed = 0;
+      }
+    }
+  }
+  
+  public void attachTo (Node attach)
+  {
+    attach.attachChild (this.image);
+  }
+  
+  public void detachFrom (Node detach)
+  {
+    detach.detachChild (this.image);
+  }
+  
+  public Geometry getImage ()
+  {
+    return this.image;
+  }
+}

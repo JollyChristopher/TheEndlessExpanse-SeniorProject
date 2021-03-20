@@ -1,0 +1,69 @@
+package halemaster.ee.world.terrain.tile;
+
+/**
+ * @name Tile
+ * 
+ * @version 0.0.0
+ * 
+ * @date Jan 30, 2014
+ */
+public class Tile 
+{
+  private TiledType type;
+  private String image;
+  private int layer;
+  
+  public Tile ()
+  {
+    this (null, null, 0);
+  }
+  
+  public Tile (TiledType type, String image, int layer)
+  {
+    this.type = type;
+    this.image = image;
+    this.layer = layer;
+  }
+
+  public TiledType getType ()
+  {
+    return type;
+  }
+
+  public void setType (TiledType type)
+  {
+    this.type = type;
+  }
+
+  public String getImage ()
+  {
+    return image;
+  }
+
+  public void setImage (String image)
+  {
+    this.image = image;
+  }
+
+  public int getLayer ()
+  {
+    return layer;
+  }
+
+  public void setLayer (int layer)
+  {
+    this.layer = layer;
+  }
+  
+  /**
+   * Check if something coming onto this tile from the given direction is 
+   * blocked.
+   * 
+   * @param direction direction coming from.
+   * @return whether the object is blocked.
+   */
+  public boolean blocks (TileStyle.Direction direction)
+  {
+    return false;
+  }
+}

@@ -1,0 +1,3 @@
+{"chance":100, "choice":["The :NAMEGEN:war.1: :NAMEGEN:battle.1", "The :NAMEGEN:battle.1: of :NAMEGEN:battle.2", "NAMEGEN:battle.2: :NAMEGEN:battle.1"]}
+{"chance":0,"choice":["Battle","Massacre","Struggle","Conquest","Defeat","Victory","Conflict"]}
+{"chance":0,"choice":["Fort :NAMEGEN:war.3","Castle :NAMEGEN:war.3","NAMEGEN:settlement.0","NAMEGEN:settlement.1"]}

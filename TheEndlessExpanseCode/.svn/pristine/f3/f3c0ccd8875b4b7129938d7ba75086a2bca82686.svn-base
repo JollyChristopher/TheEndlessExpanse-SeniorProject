@@ -1,0 +1,85 @@
+package halemaster.ee;
+
+import com.jme3.asset.AssetManager;
+import com.jme3.material.Material;
+import com.jme3.material.RenderState;
+import com.jme3.renderer.queue.RenderQueue;
+import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
+import com.jme3.scene.shape.Box;
+import com.jme3.texture.Texture;
+import com.jme3.texture.Texture2D;
+
+/**
+ * @name Sprite
+ * 
+ * @version 0.0.0
+ * 
+ * @date Jan 28, 2014
+ */
+public class Sprite 
+{
+  private float fps;
+  private float passed = fps;
+  private int next = 1;
+  private Texture[] textures;
+  private Geometry image;
+  
+  public Sprite (String name, AssetManager manager, float fps, int layer, 
+          String ... textures)
+  {
+    this.fps = fps;
+    
+    this.textures = new Texture2D[textures.length];
+    for (int i = 0; i < this.textures.length; i++)
+    {
+      this.textures[i] = manager.loadTexture(textures[i]);
+    }
+    
+    Box spriteBox = new Box(1f,0.01f,1f);
+    this.image = new Geometry(name, spriteBox);
+    Material spriteMat = new Material(manager, 
+        "Common/MatDefs/Misc/Unshaded.j3md");
+    spriteMat.setTexture ("ColorMap", this.textures[0]);
+    spriteMat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+    this.image.setQueueBucket(RenderQueue.Bucket.Transparent);
+    this.image.setMaterial(spriteMat);
+    this.image.rotate (0f, (float) (Math.PI / 2), 0f);
+    this.image.move (0, layer, 0);
+    this.image.scale ((float) (1 - layer * .025));
+  }
+  
+  public void update (float tpf)
+  {
+    if (this.textures.length > 1)
+    {
+      this.passed += tpf;
+      if (this.passed > 1.0f / this.fps)
+      {
+        this.image.getMaterial ().setTexture ("ColorMap", this.textures[this.next]);
+        this.next++;
+        if (this.next >= this.textures.length)
+        {
+          this.next = 0;
+        }
+
+        this.passed = 0;
+      }
+    }
+  }
+  
+  public void attachTo (Node attach)
+  {
+    attach.attachChild (this.image);
+  }
+  
+  public void detachFrom (Node detach)
+  {
+    detach.detachChild (this.image);
+  }
+  
+  public Geometry getImage ()
+  {
+    return this.image;
+  }
+}

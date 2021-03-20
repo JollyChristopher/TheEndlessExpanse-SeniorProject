@@ -1,0 +1,274 @@
+package halemaster.ee.quest;
+
+import halemaster.ee.Json;
+import halemaster.ee.world.Biome;
+import halemaster.ee.world.entity.Entity;
+import halemaster.ee.world.entity.EntityGenerator;
+import halemaster.ee.world.history.event.Event;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * @name QuestTemplate
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ */
+public class QuestTemplate 
+{
+  public static final String ANY = "any";
+  public static final String INSTANT = "instant";
+  public static final String SELF = "self";
+  public static final String QUEST_FOLDER = "assets/Quests";
+  private static List<QuestTemplate> loadedTemplates = null;
+  private static final Logger LOGGER = 
+          Logger.getLogger (QuestTemplate.class.getName ());
+  
+  private String id;
+  private Map<String, Integer[]> kill;
+  private Map<String, Integer[]> item;
+  private Map<String, String[]>talk;
+  private String[] jobs;
+  private String[] biomes;
+  private String[] history;
+  private String[] chain;
+  private int offerRate;
+  private int talkCount;
+  private String[] turnIn;
+
+  public String getId ()
+  {
+    return id;
+  }
+
+  public Map<String, Integer[]> getKill ()
+  {
+    return kill;
+  }
+
+  public Map<String, Integer[]> getItem ()
+  {
+    return item;
+  }
+
+  public Map<String, String[]> getTalk ()
+  {
+    return talk;
+  }
+
+  public String[] getJobs ()
+  {
+    return jobs;
+  }
+
+  public String[] getBiomes ()
+  {
+    return biomes;
+  }
+
+  public String[] getHistory ()
+  {
+    return history;
+  }
+
+  public String[] getChain ()
+  {
+    return chain;
+  }
+
+  public int getOfferRate ()
+  {
+    return offerRate;
+  }
+
+  public int getTalkCount ()
+  {
+    return talkCount;
+  }
+
+  public String[] getTurnIn ()
+  {
+    return turnIn;
+  }
+  
+  /**
+   * Check whether the string exists in the given set
+   * @param set set to look in
+   * @param against string to look for
+   * @return whether the string exists in the set
+   */
+  private static boolean checkRegular (Collection<String> set, String against)
+  {
+    boolean found = false;
+    Iterator<String> eachItem = set.iterator ();
+    String possible;
+    
+    if (set.size () > 0)
+    {
+      while (!found && eachItem.hasNext ())
+      {
+        possible = eachItem.next ();
+        if (SELF.equals (possible) || INSTANT.equals (possible) || 
+                ANY.equals (possible))
+        {
+          found = true;
+        }
+        else if (possible.equals (against))
+        {
+          found = true;
+        }
+      }
+    }
+    else
+    {
+      found = true;
+    }
+    
+    return found;
+  }
+  
+  /**
+   * Look for one of the given againsts in the given set
+   * @param set set to look in
+   * @param against set to find at least one of
+   * @return if any string from against can be found in set, true
+   */
+  private static boolean checkNested (Collection<String> set, 
+          Collection<String> against)
+  {
+    boolean found = false;
+    Iterator<String> eachItem = against.iterator ();
+    
+    while (!found && eachItem.hasNext ())
+    {
+      found = checkRegular (set, eachItem.next ());
+    }
+    
+    return found;
+  }
+  
+  /**
+   * Get the possible quest templates for the given information.
+   * @param entity npc who would offer the quest
+   * @param history history relating to that npc
+   * @param biome biome the npc comes from
+   * @param otherEntities other entities near the npc
+   * @return list of quest templates that can be used.
+   */
+  public static List<QuestTemplate> possibleQuests (Entity entity,
+          Set<Event> history, Biome biome, List<Entity> otherEntities)
+  {
+    List<QuestTemplate> quests = new ArrayList<QuestTemplate> ();
+    Set<String> historyFind = new HashSet<String> ();
+    Set<String> otherCareers = new HashSet<String> ();
+    Set<String> otherNames = new HashSet<String> ();
+    
+    if (null == loadedTemplates)
+    {
+      loadTemplates ();
+    }
+    
+    for (Event event : history)
+    {
+      historyFind.add (event.getType ().getId ());
+    }
+    
+    for (Entity other : otherEntities)
+    {
+      otherCareers.add (other.getData (EntityGenerator.NPC_CAREER));
+      otherNames.add (other.getName ());
+    }
+    
+    for (QuestTemplate template : loadedTemplates)
+    {
+      boolean possible = true;
+      
+      // check job
+      if (!checkRegular (Arrays.asList (template.jobs), entity.getData 
+              (EntityGenerator.NPC_CAREER)))
+      {
+        possible = false;
+      }
+      
+      // check history      
+      if (!checkNested (Arrays.asList (template.history), historyFind))
+      {
+        possible = false;
+      }
+      
+      // check biomes
+      if (!checkRegular (Arrays.asList (template.biomes), biome.getName ()))
+      {
+        possible = false;
+      }
+      
+      // check turnIn
+      if (!checkNested (Arrays.asList (template.turnIn), otherCareers))
+      {
+        possible = false;
+      }
+      
+      // check talk
+      if (!checkNested (Arrays.asList (template.talk.get (entity.getData 
+              (EntityGenerator.NPC_CAREER))), otherCareers))
+      {
+        possible = false;
+      }
+      
+      // check kill
+      if (!checkNested (template.kill.keySet (), otherNames))
+      {
+        possible = false;
+      }
+      
+      // check item TODO: items don't exist yet, so these can't exist
+      if (template.item.size () > 0)
+      {
+        possible = false;
+      }
+      
+      // add if passed all the tests
+      if (possible)
+      {
+        quests.add (template);
+      }
+    }
+    
+    return quests;
+  }
+  
+  /**
+   * reload all templates from Quests folder
+   */
+  public static void loadTemplates ()
+  {
+    File questFolder = new File (QUEST_FOLDER);
+    QuestTemplate[] quests;
+    
+    loadedTemplates = new ArrayList<QuestTemplate> ();
+    
+    for (File quest : questFolder.listFiles ())
+    {
+      try
+      {
+        quests = Json.getFromFile (quest, QuestTemplate.class);
+        loadedTemplates.addAll (Arrays.asList (quests));
+      }
+      catch (IOException e)
+      {
+        LOGGER.log (Level.WARNING, "Could not load quest file", e);
+      }
+    }
+  }
+}

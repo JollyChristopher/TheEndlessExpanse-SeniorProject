@@ -1,0 +1,189 @@
+package halemaster.ee.world.history.event;
+
+import halemaster.ee.world.Area;
+import halemaster.ee.world.history.event.structures.EventObject;
+import halemaster.ee.world.history.event.structures.EventObjectType;
+import halemaster.ee.world.history.event.type.EventType;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+/**
+ * @name Event
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class Event 
+{
+  private transient EventType type;
+  private transient int date;
+  private transient Area location;
+  private transient boolean locked;
+  private transient Map<String, EventObject> variables = 
+          new HashMap<String, EventObject>();
+  private transient EventHolder holder;
+  private transient boolean settled = true;
+  
+  private String unshakenTypeId = null;
+  private Integer unshakenX = null;
+  private Integer unshakenY = null;
+  private Map<String, String> unshakenVariables = null;
+  private Integer unshakenDate = null;
+  private Boolean unshakenLocked = null;
+
+  public boolean isSettled ()
+  {
+    return settled;
+  }
+
+  public void setSettled (boolean settled)
+  {
+    this.settled = settled;
+  }
+  
+  /**
+   * Shake unshaken values in order to fill out the event with the given values. 
+   */
+  public void shake () throws InstantiationException, 
+          IllegalAccessException
+  {
+    EventObject obj;
+    
+    if (null != unshakenDate)
+    {
+      setDate (unshakenDate);
+      unshakenDate = null;
+    }
+    if (null != unshakenLocked)
+    {
+      setLock (unshakenLocked);
+      unshakenLocked = null;
+    }
+    if (null != unshakenTypeId)
+    {
+      setType (this.holder.getType (unshakenTypeId));
+      unshakenTypeId = null;
+    }
+    if (null != unshakenX && null != unshakenY)
+    {
+      setLocation (unshakenX, unshakenY);
+      unshakenX = null;
+      unshakenY = null;
+    }
+    if (null != unshakenVariables)
+    {
+      for (Entry<String, String> var : unshakenVariables.entrySet ())
+      {
+        obj = EventObjectType.getByType 
+                (this.type.getVariableType (var.getKey ()))
+                .getObject (var.getValue ());
+        if (null == obj)
+        {
+          obj = EventObjectType.getByType 
+                  (this.type.getVariableType (var.getKey ()))
+                .getSetObject (var.getValue ());          
+          obj.setEvent (this);
+        }
+        addVariable (var.getKey (), obj);
+      }
+      
+      unshakenVariables = null;
+    }
+  }
+  
+  /**
+   * Unshake the Event in order to save it to the file.
+   */
+  public void unShake ()
+  {
+    unshakenTypeId = getType ().getId ();
+    unshakenX = getLocation ().getX ();
+    unshakenY = getLocation ().getY ();
+    unshakenDate = getDate ();
+    unshakenLocked = getLock ();
+    unshakenVariables = new HashMap<String, String>();
+    for (Entry<String, EventObject> var : this.variables.entrySet ())
+    {
+      unshakenVariables.put (var.getKey (), var.getValue ().getValue ());
+    }
+  }
+  
+  public void setHolder (EventHolder holder)
+  {
+    this.holder = holder;
+  }
+  
+  public EventHolder getHolder ()
+  {
+    return this.holder;
+  }
+  
+  public boolean getLock ()
+  {
+    return this.locked;
+  }
+  
+  public void setLock (boolean locked)
+  {
+    this.locked = locked;
+  }
+
+  public EventType getType ()
+  {
+    return type;
+  }
+
+  public void setType (EventType type)
+  {
+    this.type = type;
+  }
+
+  public int getDate ()
+  {
+    return date;
+  }
+
+  public void setDate (int date)
+  {
+    this.date = date;
+  }
+
+  public Area getLocation ()
+  {
+    return location;
+  }
+  
+  public void setLocation (int x, int y)
+  {
+    this.location = new Area (x, y);
+  }
+  
+  public void addVariable (String name, EventObject object)
+  {
+    this.variables.put (name, object);
+  }
+  
+  public EventObject getVariable (String name)
+  {
+    EventObject obj = this.variables.get (name);
+    
+    if (null == obj && null != this.type)
+    {
+      for (String countAs : this.type.getCountsIds ())
+      {
+        for (Entry<String, String> vars : 
+                this.type.getCounts (countAs).entrySet ())
+        {
+          if (vars.getValue ().equals (name))
+          {
+            obj = this.variables.get (vars.getKey ());
+          }
+        }
+      }
+    }
+    
+    return obj;
+  }
+}

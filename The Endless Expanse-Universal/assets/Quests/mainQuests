@@ -1,0 +1,4 @@
+{"id":"talk.friendly", "kill":{}, "item":{}, "talk":{"any":["any"]}, "jobs":[], "biomes":[], "history":[], "chain":[], "offerRate":1, "talkCount":1}
+{"id":"talk.unfriendly", "kill":{}, "item":{}, "talk":{"any":["any"]}, "jobs":[], "biomes":[], "history":[], "chain":[], "offerRate":1, "talkCount":1}
+{"id":"kill.any", "kill":{"any":[-1]}, "item":{}, "talk":{}, "jobs":[], "biomes":[], "history":[], "chain":[], "offerRate":1, "talkCount":0}
+{"id":"gather.any", "kill":{}, "item":{"any":[-1]}, "talk":{}, "jobs":[], "biomes":[], "history":[], "chain":[], "offerRate":1, "talkCount":0}

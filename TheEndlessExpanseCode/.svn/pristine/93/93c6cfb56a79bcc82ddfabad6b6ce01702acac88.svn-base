@@ -1,0 +1,141 @@
+package halemaster.ee.state.command;
+
+import de.lessvoid.nifty.controls.Console;
+import halemaster.ee.state.PlayerState;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @name Command
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 13, 2014
+ */
+public abstract class Command 
+{
+  public enum CommandLevel
+  {
+    USER (0, 0),
+    HIDDEN (USER.visibleLevel + 100, USER.usableLevel),
+    ADMIN (HIDDEN.visibleLevel + 900, HIDDEN.visibleLevel + 900);
+    
+    private int visibleLevel;
+    private int usableLevel;
+    
+    private CommandLevel (int visibleLevel, int usableLevel)
+    {
+      this.visibleLevel = visibleLevel;
+      this.usableLevel = usableLevel;
+    }
+    
+    /**
+     * Test to see if the given command level is visible according to the
+     * current command level.
+     * @param level level to check visibility of
+     * @return whether the command is visible
+     */
+    public boolean visible (CommandLevel level)
+    {
+      return level.visibleLevel <= this.visibleLevel;
+    }
+    
+    /**
+     * Test to see if the given command level is usable according to the
+     * current command level.
+     * @param level level to check usability of
+     * @return whether the command is usable
+     */
+    public boolean usable (CommandLevel level)
+    {
+      return level.usableLevel <= this.usableLevel;
+    }
+  }
+  
+  private static final Map<String, Command> commands = 
+          new HashMap<String, Command>();
+  private static CommandLevel level = CommandLevel.USER;
+  
+  /**
+   * Register Commands here.
+   * commands.put (ID, new CommandClass ());
+   */
+  static
+  {
+    commands.put (CommandExit.NAME, new CommandExit ());
+    commands.put (CommandHelp.NAME, new CommandHelp ());
+    commands.put (CommandSay.NAME, new CommandSay ());
+    commands.put (CommandAdmin.NAME, new CommandAdmin ());
+    commands.put (CommandXp.NAME, new CommandXp ());
+    commands.put (CommandHeal.NAME, new CommandHeal ());
+  }
+  
+  /**
+   * Execute the given command
+   * @param arguments arguements of the command
+   * @param state player state for game modification
+   * @param console console calling the command
+   * @return whether the command was formatted properly
+   */
+  public abstract boolean execute (String[] arguments, PlayerState state,
+          Console console);
+  
+  /**
+   * Get the usage string of the Command
+   * @return the usage string of the command
+   */
+  public abstract String getUsage ();
+  
+  /**
+   * Get the level of the command.
+   * @return the level of the command.
+   */
+  public abstract CommandLevel getLevel ();
+  
+  /**
+   * Find a command by name.
+   * @param command command to find
+   * @return the Command, or null if it doesn't exist within level reach.
+   */
+  public static Command findCommand (String command)
+  {
+    Command foundCommand = commands.get (command);
+    
+    if (null != foundCommand && !level.usable (foundCommand.getLevel ()))
+    {
+      foundCommand = null;
+    }
+    
+    return foundCommand;
+  }
+  
+  /**
+   * Get all command names
+   * @return names of commands
+   */
+  public static List<String> getCommandNames ()
+  {
+    List<String> commandList = new ArrayList<String> ();
+    
+    for (String command : commands.keySet ())
+    {
+      if (level.visible (commands.get (command).getLevel ()))
+      {
+        commandList.add (command);
+      }
+    }
+    
+    return commandList;
+  }
+  
+  /**
+   * Set the level of the Command interface
+   * @param newLevel the new level of the command interface
+   */
+  public static void setLevel (CommandLevel newLevel)
+  {
+    level = newLevel;
+  }
+}

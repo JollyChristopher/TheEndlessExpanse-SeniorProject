@@ -1,0 +1,129 @@
+package halemaster.ee.quest;
+
+import halemaster.ee.world.Biome;
+import halemaster.ee.world.entity.Entity;
+import halemaster.ee.world.history.event.Event;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @name Offer
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ */
+public class Offer 
+{
+  public static final String WORLD_SEPARATOR = ";";
+  public static final String OFFER_SEPARATOR = ",";
+  private static Map<String, Map<String, Offer>> loadedOffers = 
+          new HashMap<String, Map<String, Offer>>();
+  
+  private transient Entity npc;
+  private String offerId;
+  private String turnIn;
+  private Reward reward;
+  private Requirement requirements;
+  private int offerRate;
+  private Map<String, Integer> offered;
+
+  public Entity getNpc ()
+  {
+    return npc;
+  }
+
+  public String getOfferId ()
+  {
+    return offerId;
+  }
+
+  public String getTurnIn ()
+  {
+    return turnIn;
+  }
+
+  public Reward getReward ()
+  {
+    return reward;
+  }
+
+  public Requirement getRequirements ()
+  {
+    return requirements;
+  }
+
+  public int getOfferRate ()
+  {
+    return offerRate;
+  }
+  
+  public int getOfferAmount (String playerName)
+  {
+    return this.offered.get (playerName);
+  }
+  
+  /**
+   * Finish the quest for the given player
+   * @param playerName name of the player
+   * @return the reward for the quest
+   */
+  public Reward finishQuest (String playerName)
+  {
+    return null;
+  }
+  
+  /**
+   * Get the offer with the given id if in memory.
+   * @param id id of offer
+   * @return Offer with the given id
+   */
+  public static Offer getOffer (String id)
+  {
+    return null;
+  }
+
+  /**
+   * Load the given Offer for the entity.
+   * @param id id of offer to load
+   * @param entity entity to load offer into
+   * @return Offer loaded. This is stored into recently loaded offers as well.
+   */
+  public static Offer loadOffer (String id, Entity entity)
+  {
+    return null;
+  }
+
+  /**
+   * Save the offer to file.
+   * @param offer offer to save
+   */
+  public static void saveOffer (Offer offer)
+  {
+    
+  }
+
+  /**
+   * Create a brand new offer
+   * @param template template to base offer on
+   * @param npc npc who offers
+   * @param biome biome the npc is at
+   * @param history list of historical events that have happened to the npc
+   * @param otherCreatures other entities nearby the npc, sans any players
+   * @return the offer created
+   */
+  public static Offer newOffer (QuestTemplate template, Entity npc, Biome biome,
+          List<Event> history, List<Entity> otherCreatures)
+  {
+    return null;
+  }
+
+  /**
+   * Clears all offers, saving them one by one
+   */
+  public static void clearOffers ()
+  {
+    
+  }
+}

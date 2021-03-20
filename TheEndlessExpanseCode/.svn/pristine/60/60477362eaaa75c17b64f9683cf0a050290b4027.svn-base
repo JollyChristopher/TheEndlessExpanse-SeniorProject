@@ -1,0 +1,150 @@
+package halemaster.ee.world.entity;
+
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import halemaster.ee.Game;
+import halemaster.ee.Sprite;
+import halemaster.ee.world.Area;
+import halemaster.ee.world.micro.AreaGenerator;
+
+/**
+ * @name Entity
+ * 
+ * @version 0.0.0
+ * 
+ * @date Feb 11, 2014
+ */
+public class Entity 
+{
+  public static final int ENTITY_LAYER = 12;
+  
+  private transient Sprite sprite;
+  private String[] images;
+  private float speed;
+  private String name;
+  private int x;
+  private int y;
+  private Area location;
+  
+  /**
+   * Initialize the Entity with sprite info
+   * @param game game to initialize with
+   */
+  public void initialize (Game game)
+  {
+    this.sprite = new Sprite (this.name, game.getAssetManager (), this.speed, 
+            ENTITY_LAYER, images);
+    game.attachSprite (this.sprite);
+    move (this.location.getX () * AreaGenerator.AREA_SIZE + this.x, 
+            this.location.getY () * AreaGenerator.AREA_SIZE + this.y);
+  }
+  
+  /**
+   * unload the entity in the game screen, effectively removing it from play.
+   * @param game game to unload with
+   */
+  public void unload (Game game)
+  {
+    game.detachSprite (this.sprite);
+  }
+  
+  /**
+   * update the entity
+   * @param tpf delta from previous update
+   */
+  public void update (float tpf)
+  {
+    this.sprite.update (tpf);
+  }
+
+  public Sprite getSprite ()
+  {
+    return sprite;
+  }
+
+  public String[] getImages ()
+  {
+    return images;
+  }
+
+  public void setImages (String[] images)
+  {
+    this.images = images;
+  }
+
+  public float getSpeed ()
+  {
+    return speed;
+  }
+
+  public void setSpeed (float speed)
+  {
+    this.speed = speed;
+  }
+
+  public String getName ()
+  {
+    return name;
+  }
+
+  public void setName (String name)
+  {
+    this.name = name;
+  }
+
+  public int getX ()
+  {
+    return x;
+  }
+
+  public void setX (int x)
+  {
+    this.x = x;
+  }
+
+  public int getY ()
+  {
+    return y;
+  }
+
+  public void setY (int y)
+  {
+    this.y = y;
+  }
+
+  public Area getLocation ()
+  {
+    return location;
+  }
+
+  public void setLocation (Area location)
+  {
+    this.location = location;
+  }
+  
+  /**
+   * move the Entity to the given x, y coordinates
+   * 
+   * @param x x to move to
+   * @param y y to move to
+   */
+  public void move (float x, float y)
+  {
+    this.sprite.move (x, y);
+  }
+  
+  /**
+   * Get the sprite location of the entity in game
+   * @return x, y coordinates of the entity in game
+   */
+  public Vector2f getAbsoluteLocation ()
+  {
+    Vector2f loc = new Vector2f();
+    Vector3f spriteLoc = this.sprite.getImage ().getLocalTranslation ();
+    
+    loc.x = spriteLoc.x;
+    loc.y = spriteLoc.z;
+    
+    return loc;
+  }
+}

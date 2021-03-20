@@ -1,0 +1,343 @@
+package halemaster.ee.world.entity;
+
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
+import halemaster.ee.Game;
+import halemaster.ee.Sprite;
+import halemaster.ee.ai.AI;
+import halemaster.ee.ai.AIManager;
+import halemaster.ee.world.Area;
+import halemaster.ee.world.micro.AreaGenerator;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+/**
+ * @name Entity
+ * 
+ * @version 0.0.0
+ * 
+ * @date Feb 11, 2014
+ */
+public class Entity 
+{
+  public static final int ENTITY_LAYER = 20;
+  public static final String CHANNEL_LEFT = "left";
+  public static final String CHANNEL_RIGHT = "right";
+  
+  private transient Sprite sprite;
+  private transient EntityHolder holder;
+  private transient Map<String, AI> ais = new HashMap<String, AI>();
+  private Map<String, String[]> images;
+  private String currentAnimation = "";
+  private float speed;
+  private String name;
+  private int x;
+  private int y;
+  private Area location;
+  private String type;
+  private Map<String, Object> data = new HashMap<String, Object>();
+  private List<String> loadedAI;
+  
+  /**
+   * Initialize the Entity with sprite info
+   * @param game game to initialize with
+   */
+  public void initialize (Game game, EntityHolder holder)
+  {
+    this.sprite = new Sprite (this.name + this.location + this.x + this.y, 
+            game.getAssetManager (), this.speed, ENTITY_LAYER);
+    for (Entry<String, String[]> image : this.images.entrySet ())
+    {
+      this.sprite.addAnimation (image.getKey (), image.getValue ());
+    }
+    game.attachSprite (this.sprite);
+    setAnimation (this.currentAnimation);
+    this.holder = holder;
+    if (null != this.loadedAI)
+    {
+      for (String ai : loadedAI)
+      {
+        addAI (ai);
+      }
+    }
+    move (this.location.getX () * AreaGenerator.AREA_SIZE + this.x, 
+            this.location.getY () * AreaGenerator.AREA_SIZE + this.y);
+  }
+  
+  /**
+   * unload the entity in the game screen, effectively removing it from play.
+   * @param game game to unload with
+   */
+  public void unload (Game game)
+  {
+    game.detachSprite (this.sprite);
+  }
+  
+  /**
+   * update the entity
+   * @param tpf delta from previous update
+   */
+  public void update (float tpf)
+  {
+    if (this.sprite != null)
+    {
+      this.sprite.update (tpf);
+    }
+  }
+
+  public Sprite getSprite ()
+  {
+    return sprite;
+  }
+
+  public Map<String, String[]> getImages ()
+  {
+    return images;
+  }
+
+  public void setImages (Map<String, String[]> images)
+  {
+    this.images = images;
+  }
+
+  public float getSpeed ()
+  {
+    return speed;
+  }
+
+  public void setSpeed (float speed)
+  {
+    this.speed = speed;
+  }
+
+  public EntityHolder getHolder ()
+  {
+    return holder;
+  }
+
+  public String getName ()
+  {
+    return name;
+  }
+
+  public void setName (String name)
+  {
+    this.name = name;
+  }
+
+  public int getX ()
+  {
+    return x;
+  }
+
+  public void setX (int x)
+  {
+    this.x = x;
+  }
+
+  public int getY ()
+  {
+    return y;
+  }
+
+  public void setY (int y)
+  {
+    this.y = y;
+  }
+
+  public Area getLocation ()
+  {
+    return location;
+  }
+
+  public void setLocation (Area location)
+  {
+    this.location = location;
+  }
+
+  public String getType ()
+  {
+    return type;
+  }
+
+  public void setType (String type)
+  {
+    this.type = type;
+  }
+  
+  public void setAnimation (String anim)
+  {
+    if (null != this.sprite)
+    {
+      this.sprite.setAnimation (anim);
+    }
+    this.currentAnimation = anim;
+  }
+  
+  /**
+   * Set the given data to the entity.
+   * @param key key of the data
+   * @param data data to add
+   */
+  public void setData (String key, Object data)
+  {
+    this.data.put (key, data);
+  }
+  
+  /**
+   * Get the data with the given key
+   * @param key key of the data
+   * @return data found at that key
+   */
+  public Object getData (String key)
+  {
+    return this.data.get (key);
+  }
+  
+  /**
+   * move the Entity to the given x, y coordinates
+   * 
+   * @param x x to move to
+   * @param y y to move to
+   */
+  public void move (float x, float y)
+  {
+    moveAbsolute (x * AreaGenerator.TILE_WIDTH, y *
+            AreaGenerator.TILE_HEIGHT);
+  }
+  
+  /**
+   * move the Entity to the given x, y coordinates
+   * 
+   * @param x x to move to
+   * @param y y to move to
+   */
+  public void moveAbsolute (float x, float y)
+  {
+    float locX = getAbsoluteLocation ().x;
+    float locY = getAbsoluteLocation ().y;
+    this.sprite.move (x, y);
+    x += locX;
+    y += locY;
+    if ((int)(x / (AreaGenerator.TILE_WIDTH * AreaGenerator.AREA_SIZE)) < 
+            this.location.getX ())
+    {
+      this.location = new Area (this.location.getX () - 1,
+              this.location.getY ());
+      this.holder.moveEntity (this, this.location);
+    }
+    if ((int)(x / (AreaGenerator.TILE_WIDTH * AreaGenerator.AREA_SIZE)) > 
+            this.location.getX ())
+    {
+      this.location = new Area (this.location.getX () + 1,
+              this.location.getY ());
+      this.holder.moveEntity (this, this.location);
+    }
+    if ((int)(y / (AreaGenerator.TILE_HEIGHT * AreaGenerator.AREA_SIZE)) < 
+            this.location.getY ())
+    {
+      this.location = new Area (this.location.getX (),
+              this.location.getY () - 1);
+      this.holder.moveEntity (this, this.location);
+    }
+    if ((int)(y / (AreaGenerator.TILE_HEIGHT * AreaGenerator.AREA_SIZE)) > 
+            this.location.getY ())
+    {
+      this.location = new Area (this.location.getX (),
+              this.location.getY () + 1);
+      this.holder.moveEntity (this, this.location);
+    }
+    this.x = (int)((x + AreaGenerator.TILE_WIDTH / 2) / 
+            AreaGenerator.TILE_WIDTH) % (AreaGenerator.AREA_SIZE);
+    this.y = (int)((y + AreaGenerator.TILE_HEIGHT / 2) / 
+            AreaGenerator.TILE_HEIGHT) % (AreaGenerator.AREA_SIZE);
+  }
+  
+  /**
+   * Snap the entity to the grid
+   */
+  public void snapToGrid ()
+  {
+    Vector2f set = new Vector2f (((this.x + this.location
+            .getX () * AreaGenerator.AREA_SIZE) * AreaGenerator.TILE_WIDTH), 
+            ((this.y + this.location.getY () * AreaGenerator.AREA_SIZE)
+            * AreaGenerator.TILE_HEIGHT));
+    
+    this.sprite.getImage ().setLocalTranslation (set.x, this.sprite.getImage ()
+            .getLocalTranslation ().y, set.y);
+  }
+  
+  /**
+   * Get the sprite location of the entity in game
+   * @return x, y coordinates of the entity in game
+   */
+  public Vector2f getAbsoluteLocation ()
+  {
+    Vector2f loc = new Vector2f();
+    Vector3f spriteLoc = this.sprite.getImage ().getLocalTranslation ();
+    
+    loc.x = spriteLoc.x;
+    loc.y = spriteLoc.z;
+    
+    return loc;
+  }
+  
+  /**
+   * Add an id with the given string to the entity
+   * @param id id of ai to add
+   */
+  public void addAI (String id)
+  {
+    AI add = AIManager.getAI (id);
+    
+    if (null != add && null != this.sprite && null == this.ais.put (id, add))
+    {
+      add.attachEntity (this);
+    }
+    
+    if (this.loadedAI == null)
+    {
+      this.loadedAI = new ArrayList<String>();
+    }
+    
+    if (!this.loadedAI.contains (id))
+    {
+      this.loadedAI.add (id);
+    }
+  }
+  
+  /**
+   * Remove the ai with the given id
+   * @param id id to remove
+   * @return the AI
+   */
+  public AI removeAI (String id)
+  {
+    AI remove = this.ais.remove (id);
+    
+    if (null != remove && null != this.sprite)
+    {
+      remove.detachEntity (this);
+    }
+    
+    if (null != this.loadedAI && !this.loadedAI.contains (id))
+    {
+      this.loadedAI.remove (id);
+    }
+    
+    return remove;
+  }
+  
+  /**
+   * Get the AI with the given id
+   * @param id id of the AI
+   * @return the AI found with the id
+   */
+  public AI getAI (String id)
+  {
+    return this.ais.get (id);
+  }
+}

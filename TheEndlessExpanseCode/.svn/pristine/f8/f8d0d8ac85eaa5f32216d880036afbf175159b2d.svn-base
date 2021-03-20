@@ -1,0 +1,105 @@
+package halemaster.ee.world.history.event.type;
+
+import halemaster.ee.world.history.event.Event;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @name EventTypeHolder
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class EventTypeHolder 
+{
+  private Map<String, EventType> types = new HashMap<String, EventType>();
+  
+  public EventType getType (String id)
+  {
+    return this.types.get (id);
+  }
+  
+  public void addType (EventType type)
+  {
+    this.types.put (type.getId (), type);
+  }
+  
+  /**
+   * Given the events, create an array of EventMappers that can possibly be
+   * spawned.
+   * 
+   * @param events events to find mappers for.
+   * @return array of possible event mappers.
+   */
+  public EventMapper[] generateMappers (Event[] events)
+  {
+    EventMapper[] mappers = new EventMapper[0];
+    EventMapper temp;
+    String[] typeNames;
+    List<EventMapper> tempEvents;
+    List<EventMapper> allEvents = new ArrayList<EventMapper>();
+    Map<String, List<EventMapper>> dependentEvents = 
+            new HashMap<String, List<EventMapper>>();
+    Collection<EventType> allTypes = this.types.values ();
+    Collection<List<EventMapper>> possibleMappers;
+    
+    for (EventType type : allTypes)
+    {
+      temp = new EventMapper();
+      temp.setType (type);
+      typeNames = type.getDependenciesIds ();
+      
+      if (null == typeNames || 0 == typeNames.length)
+      {
+        allEvents.add (temp);
+      }
+      else
+      {
+        for (int i = 0; i < typeNames.length; i++)
+        {
+          temp.addRequired (types.get (typeNames[i]));
+          tempEvents = dependentEvents.get (typeNames[i]);
+          if (null == tempEvents)
+          {
+            tempEvents = new ArrayList<EventMapper>();
+            dependentEvents.put (typeNames[i], tempEvents);
+          }
+          
+          tempEvents.add (temp);
+        }
+      }
+    }
+    
+    for (Event event : events)
+    {
+      tempEvents = dependentEvents.get (event.getType ().getId ());
+      if (null != tempEvents)
+      {
+        for (EventMapper mapper : tempEvents)
+        {
+          mapper.addParent (event);
+        }
+      }
+    }
+    
+    possibleMappers = dependentEvents.values ();
+    for (List<EventMapper> tempMappers : possibleMappers)
+    {
+      for (EventMapper tempMapper : tempMappers)
+      {
+        if (tempMapper.canCreateEvent ())
+        {
+          allEvents.add (tempMapper);
+        }
+      }
+    }
+    
+    mappers = allEvents.toArray (mappers);
+    
+    return mappers;
+  }
+}

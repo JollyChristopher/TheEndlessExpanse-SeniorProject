@@ -1,0 +1,113 @@
+package halemaster.ee.world.entity;
+
+import halemaster.ee.world.Area;
+import halemaster.ee.world.history.event.structures.Tree;
+import java.util.List;
+
+/**
+ * @name EntityHolder
+ * 
+ * @version 0.0.0
+ * 
+ * @date Feb 11, 2014
+ */
+public class EntityHolder 
+{
+  private Tree<Area, List<Entity>> entities = new Tree<Area, List<Entity>>();
+  
+  /**
+   * Get the entities at the given location
+   * @param x x to get entities at
+   * @param y y to get entities at
+   * @return 
+   */
+  public List<Entity> getEntities (int x, int y)
+  {
+    return null;
+  }
+  
+  /**
+   * Get all entities in the holder
+   * @return all entities in the holder
+   */
+  public List<Entity> getAllEntities ()
+  {
+    return null;
+  }
+  
+  /**
+   * Get all areas in the holder
+   * @return all areas in the holder
+   */
+  public List<Area> getAreas ()
+  {
+    return null;
+  }
+  
+  /**
+   * Add the given entities to the holder
+   * @param entities entities to add 
+   */
+  public void addEntity (Entity ... entities)
+  {
+    
+  }
+  
+  /**
+   * Remove the given entities from the holder
+   * @param entities entities to remove
+   */
+  public void removeEntity (Entity ... entities)
+  {
+    
+  }
+  /**
+   * Move the given entity to a different location
+   * @param entity entity to move
+   * @param loc location to move entity
+   */
+  public void moveEntity (Entity entity, Area loc)
+  {
+    
+  }
+  
+  /**
+   * Remove all entities at the given location
+   * @param x x coordinate to remove at
+   * @param y y coordinate to remove at
+   * @return list of entities at that location
+   */
+  public Entity[] removeEntitiesAt (int x, int y)
+  {
+    return null;
+  }
+  
+  /**
+   * update the entity holder
+   * @param tpf delta since last update
+   */
+  public void update (float tpf)
+  {
+    
+  }
+  
+  /**
+   * Save the given entites to file
+   * @param entities entities to save
+   */
+  public static void saveEntities (Entity[] entities)
+  {
+    
+  }
+  
+  /**
+   * Load entities from the location
+   * @param x x coordinate to load
+   * @param y y coordiante to load
+   * @return array of entities at the given location
+   */
+  public static Entity[] loadEntities (int x, int y)
+  {
+    return null;
+  }
+}

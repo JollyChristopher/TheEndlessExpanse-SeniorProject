@@ -1,0 +1,94 @@
+package halemaster.ee;
+
+import com.jme3.math.Vector2f;
+import halemaster.ee.world.entity.Entity;
+
+/**
+ * @name Overlay
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 19, 2014
+ */
+public class Overlay 
+{
+  public static final int OVERLAY_LAYER = Entity.ENTITY_LAYER + 10;
+  public static final String OVERLAY_ANIMATION = "overlay";
+  
+  private Sprite sprite;
+  private Game game;
+  private Entity destination;
+  private float speed;
+  private boolean clear;
+  private float clearTime;
+  private float fps;
+  
+  public Overlay (String name, float fps, int width, int height, 
+          String[] animation, Game game, float speed, Vector2f location, 
+          Entity destination)
+  {
+    this.game = game;
+    this.sprite = new Sprite (name, game.getAssetManager (), fps, OVERLAY_LAYER
+            , width, height);
+    this.speed = speed;
+    this.fps = fps;
+    this.destination = destination;
+    this.sprite.addAnimation (OVERLAY_ANIMATION, animation);
+    this.sprite.setAnimation (OVERLAY_ANIMATION);
+    this.sprite.getImage ().setLocalTranslation (location.x, this.sprite
+            .getImage ().getLocalTranslation ().y, location.y);
+  }
+  
+  /**
+   * Start the overlay animation
+   * @param game game to start in
+   */
+  public void start ()
+  {
+    this.game.addOverlay (this);
+    clear = false;
+  }
+  
+  /**
+   * Update the Overlay
+   * @param tpf delta since last update
+   */
+  public void update (float tpf)
+  {
+    boolean finished = true;
+    if (null != this.destination)
+    {
+      // move towards destination entity
+      
+    }
+    finished &= this.sprite.update (tpf);
+    if (finished && !this.clear)
+    {
+      this.clear = true;
+      this.clearTime = 0;
+    }
+    
+    if (this.clear)
+    {
+      this.clearTime += tpf;
+      if (this.clearTime >= 1.0f / this.fps)
+      {
+        end ();
+      }
+    }
+  }
+  
+  public Sprite getSprite ()
+  {
+    return this.sprite;
+  }
+  
+  /**
+   * Disconnect from the game
+   */
+  private void end ()
+  {
+    this.game.removeOverlay (this);
+  }
+  
+}

@@ -1,0 +1,56 @@
+package halemaster.ee.world.history.event.structures.types;
+
+import halemaster.ee.world.faction.Faction;
+import halemaster.ee.world.history.event.Event;
+import halemaster.ee.world.history.event.structures.EventObject;
+import java.util.Random;
+
+/**
+ * @name EventFaction
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class EventFaction implements EventObject
+{
+  public static String ID = "faction";
+  private String name;
+  private Event event;
+  
+  public void setEvent (Event event)
+  {
+    this.event = event;
+  }
+  
+  public void init (Random random)
+  {
+    // get a random name here
+    this.name = "faction" + String.valueOf(random.nextInt ());
+  }
+
+  public String getValue ()
+  {
+    return this.name;
+  }
+  
+  public String getPrint ()
+  {
+    return this.name;
+  }
+  
+  public void setValue (String value)
+  {
+    this.name = value;
+  }
+  
+  public String getType ()
+  {
+    return ID;
+  }
+
+  public void modify (EventObject modifier, String type)
+  {
+    
+  }
+}

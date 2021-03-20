@@ -1,0 +1,56 @@
+package halemaster.ee.world.micro;
+
+import halemaster.ee.world.Area;
+import halemaster.ee.world.Biome;
+import halemaster.ee.world.terrain.tile.BiomeTile;
+import java.util.Random;
+
+/**
+ * @name AreaGenerator
+ * 
+ * @version 0.0.0
+ * 
+ * @date Jan 30, 2014
+ */
+public class AreaGenerator 
+{
+  /**
+   * Generate an area based upon the given random, biome, and whether there is a
+   * city
+   * 
+   * @param biome biome to generate
+   * @param random random to use
+   * @param hasCity whether there is a city
+   * @return the biome tiles that generate
+   */
+  public static BiomeTile[][] generate (Biome biome, Random random,
+          boolean hasCity)
+  {
+    return null;
+  }
+  
+  /**
+   * Save the tiles at the given area for the given world
+   * 
+   * @param tiles tiles to save
+   * @param location location to save
+   * @param world world to save at
+   */
+  public static void saveTiles (BiomeTile[][] tiles, Area location, 
+          String world)
+  {
+    
+  }
+  
+  /**
+   * load the tiles for the location of the world.
+   * 
+   * @param location location to load
+   * @param world world to load
+   * @return tiles for the location in the world
+   */
+  public static BiomeTile[][] loadTiles (Area location, String world)
+  {
+    return null;
+  }
+}

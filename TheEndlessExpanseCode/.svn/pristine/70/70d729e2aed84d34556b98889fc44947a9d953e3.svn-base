@@ -1,0 +1,25 @@
+package halemaster.ee.state;
+
+import halemaster.ee.state.Menu;
+import halemaster.ee.state.PlayerState;
+
+/**
+ * @name Hud
+ * 
+ * @version 0.0.0
+ * 
+ * @date Oct 24, 2013
+ */
+public class Hud extends Menu
+{
+  public static final String FILE = "Interface/menu/hud.xml";
+  public static final String ID = "hud";
+  private PlayerState player;
+  
+  public Hud (PlayerState player)
+  {
+    super (FILE, ID);
+    
+    this.player = player;
+  }
+}

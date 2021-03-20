@@ -1,0 +1,490 @@
+package halemaster.ee.world.micro;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import halemaster.ee.Game;
+import halemaster.ee.Sprite;
+import halemaster.ee.state.PlayerState;
+import halemaster.ee.world.Area;
+import halemaster.ee.world.Biome;
+import halemaster.ee.world.BiomeClassifier;
+import halemaster.ee.world.Config;
+import halemaster.ee.world.history.HistoryGenerator;
+import halemaster.ee.world.history.event.EventHolder;
+import halemaster.ee.world.history.event.EventIO;
+import halemaster.ee.world.history.event.type.EventTypeHolder;
+import halemaster.ee.world.macro.MacroTerrainGenerator;
+import halemaster.ee.world.terrain.tile.BiomeTile;
+import halemaster.ee.world.terrain.tile.Tile;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+/**
+ * @name WorldHolder
+ * 
+ * @version 0.0.0
+ * 
+ * @date Jan 25, 2014
+ */
+public class WorldHolder implements Runnable
+{
+  public static final int THREAD_COUNT = 1;
+  public static final int TIME_INCREMENT = 6;
+  public static final int[] MAX_EVENTS = {0,0,1,1,2,3};
+  public static final long TIME_REQUIREMENT = 15 * 1000;
+  public static final long SLEEP_TIME = 100;
+  public static final Logger LOGGER = 
+          Logger.getLogger (WorldHolder.class.getName ());
+  
+  private ConcurrentHashMap<String, Area> playerLocations = 
+          new ConcurrentHashMap<String, Area>();
+  private ConcurrentHashMap<Area, BiomeTile[][]> currentAreas =
+          new ConcurrentHashMap<Area, BiomeTile[][]>();
+  private Map<Area, Map<Area, List<Sprite>>> terrain = 
+          new HashMap<Area, Map<Area, List<Sprite>>>();
+  private EventHolder currentEvents;
+  private EventTypeHolder possibleEvents;
+  private List<GenerationSequence> currentGenerators =
+          new ArrayList<GenerationSequence> ();
+  private ExecutorService runners = Executors.newFixedThreadPool (THREAD_COUNT, 
+          new ThreadFactoryBuilder().setNameFormat("TEE-generator-%d").build());
+  private volatile boolean running = true;
+  private PlayerState playerState;
+
+  public WorldHolder (PlayerState player,
+          EventTypeHolder types, EventHolder events)
+  {
+    this.possibleEvents = types;
+    this.currentEvents = events;
+    this.playerState = player;
+  }
+  
+  public EventHolder getEvents ()
+  {
+    return this.currentEvents;
+  }
+  
+  public void setPlayerLocation (String player, Area area)
+  {
+    this.playerLocations.remove (player);
+    if (null != area)
+    {
+      this.playerLocations.put (player, area);
+    }
+  }
+  
+  public void stop ()
+  {
+    this.running = false;
+  }
+  
+  private boolean isGenerated (Area location)
+  {
+    boolean generated = false;
+    
+    if (new File (Game.HOME + Game.GAME_FOLDER + 
+            Game.WORLD_FOLDER  + "/" + this.currentEvents.getWorldName ()
+            + PlayerState.LOCATION_FOLDER + AreaGenerator.AREA_FOLDER + "/" + 
+            location.getX () + "," + location.getY () +
+            "." + MacroTerrainGenerator.TERRAIN_EXT).exists ())
+    {
+      generated = true;
+    }
+    
+    return generated;
+  }
+  
+  private boolean isLoaded (Area location)
+  {
+    return this.currentAreas.containsKey (location);
+  }
+  
+  private Area findGenerationLocation ()
+  {
+    Area area = null;
+    Area temp, nextTemp;
+    Queue<Area> next = new ArrayDeque<Area> ();
+    Set<Area> unusable = new HashSet<Area> ();
+    Set<Area> generating = new HashSet<Area> ();
+    
+    for (GenerationSequence seq : this.currentGenerators)
+    {
+      generating.add (seq.getHistory ().getLocation ());
+    }
+    
+    for (Entry<String, Area> player : this.playerLocations.entrySet ())
+    {
+      next.add (player.getValue ());
+    }
+    
+    while (null == area && !next.isEmpty ())
+    {
+      temp = next.poll ();
+      
+      if (isGenerated (temp) || generating.contains (temp))
+      {
+        unusable.add (temp);
+        
+        nextTemp = new Area (temp.getX (), temp.getY () + 1);
+        if (!unusable.contains (nextTemp))
+        {
+          next.add (nextTemp);
+        }
+        nextTemp = new Area (temp.getX (), temp.getY () - 1);
+        if (!unusable.contains (nextTemp))
+        {
+          next.add (nextTemp);
+        }
+        nextTemp = new Area (temp.getX () + 1, temp.getY ());
+        if (!unusable.contains (nextTemp))
+        {
+          next.add (nextTemp);
+        }
+        nextTemp = new Area (temp.getX () - 1, temp.getY ());
+        if (!unusable.contains (nextTemp))
+        {
+          next.add (nextTemp);
+        }
+      }
+      else
+      {
+        area = temp;
+      }
+    }
+    
+    return area;
+  }
+  
+  private List<Area> getLoaded ()
+  {
+    List<Area> loaded = new ArrayList<Area>();
+    
+    for (Entry<Area, BiomeTile[][]> loadedAreas : this.currentAreas.entrySet ())
+    {
+      loaded.add (loadedAreas.getKey ());
+    }
+    
+    return loaded;
+  }
+  
+  /**
+   * Load the given location to the system.
+   * 
+   * @param location location to load
+   */
+  public void loadLocation (Area location) throws IOException, 
+          InstantiationException, IllegalAccessException
+  {
+    List<Sprite> tileSprites;
+    Sprite sprite;
+    BiomeTile[][] tiles;
+    Map<Area, List<Sprite>> sprites = new HashMap<Area, List<Sprite>>();
+    Tile tile;
+    Biome biome;
+    
+    EventIO.getEvents (this.currentEvents.getWorldName (), 
+                  this.currentEvents, location.getX (), location.getX (), 
+                  location.getY (), location.getY ());
+    this.currentAreas.put (location, AreaGenerator.loadTiles (location, 
+            this.currentEvents.getWorldName ()));
+    
+    this.terrain.put (location, sprites);
+    tiles = this.currentAreas.get (location);
+    biome = BiomeClassifier.getBiome (tiles[0][0].getBiomeId ());
+    for (int x = 0; x < tiles.length; x++)
+    {
+      for (int y = 0; y < tiles[x].length; y++)
+      {
+        tileSprites = new ArrayList<Sprite>();
+        for (Integer id : tiles[x][y].getTileIds ())
+        {
+          tile = biome.getGeneration ().getTiles ()[id];
+          sprite = new Sprite (tiles[x][y].getBiomeId () + ";" + id, 
+                  this.playerState.getGame ()
+                  .getAssetManager (), tile.getSpeed (), tile.getLayer (), 
+                  tile.getImages ());
+          tileSprites.add (sprite);
+          this.playerState.getGame ().attachSprite (sprite);
+          sprite.move (location.getX () * AreaGenerator.AREA_SIZE * 
+                  AreaGenerator.TILE_WIDTH + x * AreaGenerator.TILE_WIDTH, 
+                  location.getY () * AreaGenerator.AREA_SIZE * 
+                  AreaGenerator.TILE_HEIGHT + y * AreaGenerator.TILE_HEIGHT);
+        }
+        sprites.put (new Area (x, y), tileSprites);
+      }
+    }
+  }
+  
+  /**
+   * Unload the given location from the system.
+   * 
+   * @param location location to unload
+   */
+  public void unloadLocation (Area location)
+  {    
+    this.currentEvents.removeEvents (0, Integer.MAX_VALUE, location.getX (),
+                  location.getX (), location.getY (), location.getY ());
+    this.currentAreas.remove (location);
+    
+    for (Entry<Area, List<Sprite>> spriteList : 
+            this.terrain.get (location).entrySet ())
+    {
+      for (Sprite sprite : spriteList.getValue ())
+      {
+        this.playerState.getGame ().detachSprite (sprite);
+      }
+    }
+  }
+  
+  public void run ()
+  {
+    HistoryGenerator createdEvents;
+    HistoryGenerator newEvents;
+    Area area;
+    Set<Area> loadLocations = new HashSet<Area> ();
+    long passage = 0;
+    long last = System.currentTimeMillis ();
+    
+    while (this.running)
+    {
+      // look for finished generators, remove them from the map, and then add
+      // the areas from the generated map. Save events
+      for (int i = 0; i < this.currentGenerators.size (); i++)
+      {
+        if (this.currentGenerators.get (i).isDone ())
+        {
+          createdEvents = this.currentGenerators.get (i).getHistory ();
+          try
+          {
+            EventIO.saveEvents (createdEvents.getCreated (), 
+                    this.currentEvents.getWorldName (),
+                  createdEvents.getTop (), 
+                  createdEvents.getBottom (), 
+                  createdEvents.getLeft (), 
+                  createdEvents.getRight ());
+            area = new Area (createdEvents.getLeft (), 
+                    createdEvents.getTop ());
+            AreaGenerator.saveTiles (this.currentGenerators.get (i).getArea (), 
+                    area, this.currentEvents.getWorldName ());
+          }
+          catch (IOException e)
+          {
+            LOGGER.log (Level.WARNING, "Could not save events", e);
+          }
+          this.currentGenerators.remove (i);
+          i--;
+        }
+      }
+      
+      // look for areas that need to be loaded and load them, causing us to
+      // generate if need be
+      for (Entry<String, Area> player : this.playerLocations.entrySet ())
+      {
+        area = new Area (player.getValue ().getX () - 1, player.getValue ().getY () - 1);
+        loadLocations.add (area);
+        area = new Area (player.getValue ().getX () - 1, player.getValue ().getY ());
+        loadLocations.add (area);
+        area = new Area (player.getValue ().getX () - 1, player.getValue ().getY () + 1);
+        loadLocations.add (area);
+        area = new Area (player.getValue ().getX (), player.getValue ().getY () - 1);
+        loadLocations.add (area);
+        area = new Area (player.getValue ().getX (), player.getValue ().getY ());
+        loadLocations.add (area);
+        area = new Area (player.getValue ().getX (), player.getValue ().getY () + 1);
+        loadLocations.add (area);
+        area = new Area (player.getValue ().getX () + 1, player.getValue ().getY () - 1);
+        loadLocations.add (area);
+        area = new Area (player.getValue ().getX () + 1, player.getValue ().getY ());
+        loadLocations.add (area);
+        area = new Area (player.getValue ().getX () + 1, player.getValue ().getY () + 1);
+        loadLocations.add (area);
+      }
+      
+      // load those in set if not already loaded
+      for (Area load : loadLocations)
+      {
+        if (!isLoaded (load))
+        {
+          try
+          {
+            loadLocation (load);
+          }
+          catch (IOException e)
+          {
+            LOGGER.log (Level.WARNING, "Could not load events", e);
+          }
+          catch (InstantiationException e)
+          {
+            LOGGER.log (Level.WARNING, "Could not load events", e);
+          }
+          catch (IllegalAccessException e)
+          {
+            LOGGER.log (Level.WARNING, "Could not load events", e);
+          }
+          
+          boolean alreadyGenerating = false;
+          
+          for (GenerationSequence seq : this.currentGenerators)
+          {
+            if (seq.getHistory ().getLocation ().equals (load))
+            {
+              alreadyGenerating = true;
+            }
+          }
+          
+          if (!isGenerated(load) && !alreadyGenerating)
+          {
+            try
+            {
+              newEvents = new HistoryGenerator ();
+              newEvents.setBasis (this.currentEvents);
+              newEvents.setTypes (this.possibleEvents);
+              newEvents.setIncrement (TIME_INCREMENT);
+              newEvents.setGrouping (MAX_EVENTS);
+              newEvents.setUntil (Integer.valueOf (Config.getValue 
+                      (this.currentEvents.getWorldName (), "time")));
+              newEvents.setTop (load.getY ());
+              newEvents.setBottom (load.getY ());
+              newEvents.setLeft (load.getX ());
+              newEvents.setRight (load.getX ());
+              newEvents.setLocation (load);
+              long seed = Long.valueOf (Config.getValue 
+                      (this.currentEvents.getWorldName (), "seed")) + 
+                      load.getX () + load.getY () *
+                      this.currentEvents.getWorldSize ();
+              newEvents.setRandom (new Random (seed));
+              for (EventTypeHolder ref : this.currentEvents.getTypeHolders ())
+              {
+                newEvents.addReference (ref);
+              }
+              GenerationSequence sequence = new GenerationSequence (newEvents);
+              this.currentGenerators.add (sequence);
+              this.runners.execute (sequence);
+            }
+            catch (IOException e)
+            {
+              LOGGER.log (Level.WARNING, "Could not generate area", e);
+            }
+          }
+        }
+      }
+      
+      // look for areas that need to be unloaded and unload them
+      for (Area unload : getLoaded ())
+      {
+        if (!loadLocations.contains (unload))
+        {
+          unloadLocation (unload);
+        }
+      }
+      
+      // add one new generate near a player (but outside of the currently
+      // generating) to the runner
+      if (passage >= TIME_REQUIREMENT)
+      {
+        Area newLoc = findGenerationLocation ();
+        if (null != newLoc)
+        {
+          try
+          {
+            newEvents = new HistoryGenerator ();
+            newEvents.setBasis (this.currentEvents);
+            newEvents.setTypes (this.possibleEvents);
+            newEvents.setIncrement (TIME_INCREMENT);
+            newEvents.setGrouping (MAX_EVENTS);
+            newEvents.setUntil (Integer.valueOf (Config.getValue 
+                    (this.currentEvents.getWorldName (), "time")));
+            newEvents.setTop (newLoc.getY ());
+            newEvents.setBottom (newLoc.getY ());
+            newEvents.setLeft (newLoc.getX ());
+            newEvents.setRight (newLoc.getX ());
+            newEvents.setLocation (newLoc);
+            long seed = Long.valueOf (Config.getValue 
+                    (this.currentEvents.getWorldName (), "seed")) + 
+                    newLoc.getX () + newLoc.getY () *
+                    this.currentEvents.getWorldSize ();
+            newEvents.setRandom (new Random (seed));
+            for (EventTypeHolder ref : this.currentEvents.getTypeHolders ())
+            {
+              newEvents.addReference (ref);
+            }
+            GenerationSequence sequence = new GenerationSequence (newEvents);
+            this.currentGenerators.add (sequence);
+            this.runners.execute (sequence);
+          }
+          catch (IOException e)
+          {
+            LOGGER.log (Level.WARNING, "Could not generate area", e);
+          }
+        }
+        
+        passage = 0;
+      }
+      
+      passage += System.currentTimeMillis () - last;
+      last = System.currentTimeMillis ();
+      
+      try
+      {
+        Thread.sleep (SLEEP_TIME);
+      }
+      catch (InterruptedException e)
+      {
+        LOGGER.log (Level.INFO, "Thread was interrupted", e);
+      }
+    }
+    
+    this.runners.shutdown ();
+    try
+    {
+      this.runners.awaitTermination (10, TimeUnit.MINUTES);
+    }
+    catch (InterruptedException e)
+    {
+      LOGGER.log (Level.WARNING, "Runner was interrupted", e);
+    }
+    
+    // save off remaining locations that needed generation
+    for (int i = 0; i < this.currentGenerators.size (); i++)
+    {
+      if (this.currentGenerators.get (i).isDone ())
+      {
+        createdEvents = this.currentGenerators.get (i).getHistory ();
+        try
+        {
+          EventIO.saveEvents (createdEvents.getCreated (), 
+                  this.currentEvents.getWorldName (),
+                createdEvents.getTop (), 
+                createdEvents.getBottom (), 
+                createdEvents.getLeft (), 
+                createdEvents.getRight ());
+          area = new Area (createdEvents.getTop (), 
+                  createdEvents.getLeft ());
+          AreaGenerator.saveTiles (this.currentGenerators.get (i).getArea (), 
+                    area, this.currentEvents.getWorldName ());
+        }
+        catch (IOException e)
+        {
+          LOGGER.log (Level.WARNING, "Could not save events", e);
+        }
+        this.currentGenerators.remove (i);
+        i--;
+      }
+    }
+  }
+}

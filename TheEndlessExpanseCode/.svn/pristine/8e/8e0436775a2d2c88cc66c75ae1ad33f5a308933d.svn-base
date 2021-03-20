@@ -1,0 +1,38 @@
+#type names
+item.type.USE=Usable
+item.type.MAIN_HAND=Main Hand
+item.type.OFF_HAND=Off Hand
+item.type.MAIN_HAND.OFF_HAND=Main and Off Hand
+item.type.HELM=Helm
+item.type.ACCESSORY=Accessory
+item.type.GLOVES=Gloves
+item.type.BODY=Body
+item.type.LEGS=Leggings
+item.type.BOOTS=Boots
+item.type.BELT=Belt
+
+item.equip.stat.damage.POWER={0} - {1} Melee
+item.equip.stat.damage.AGILITY={0} - {1} Ranged
+item.equip.stat.damage.INTELLECT={0} - {1} Magik
+item.use.stat.damage=Deals {0} - {1} Damage
+item.use.stat.heal=Heals {0} - {1} Health
+
+#boost names
+item.equip.stat.boost.POWER=+{0} Power
+item.equip.stat.boost.AGILITY=+{0} Agility
+item.equip.stat.boost.INTELLECT=+{0} Intellect
+item.equip.stat.boost.HEALTH=+{0} Health
+item.equip.stat.boost.ARMOR=+{0} Armor
+item.equip.stat.boost.ACCURACY=+{0} Accuracy
+item.equip.stat.boost.CRAFT=+{0} Craft
+item.equip.stat.boost.CRITICAL=+{0} Critical
+item.equip.stat.boost.HASTE=+{0} Haste
+item.equip.stat.boost.RANGE=+{0} Range
+item.use.stat.boost.POWER=Increase Power by {0}
+item.use.stat.boost.AGILITY=Increase Agility by {0}
+item.use.stat.boost.INTELLECT=Increase Intellect by {0}
+item.use.stat.boost.XP=Increase Xp by {0}
+
+#item names
+item.use.vial.red=Healing Potion Lv.{0}
+item.equip.main.off.stick=Stick Lv.{0}

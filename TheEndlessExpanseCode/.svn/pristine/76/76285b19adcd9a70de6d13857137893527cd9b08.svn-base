@@ -1,0 +1,797 @@
+package halemaster.ee.state;
+
+import com.jme3.app.Application;
+import com.jme3.app.state.AppStateManager;
+import de.lessvoid.nifty.EndNotify;
+import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.NiftyEventSubscriber;
+import de.lessvoid.nifty.controls.Chat;
+import de.lessvoid.nifty.controls.ChatTextSendEvent;
+import de.lessvoid.nifty.controls.Console;
+import de.lessvoid.nifty.controls.ConsoleExecuteCommandEvent;
+import de.lessvoid.nifty.controls.Label;
+import de.lessvoid.nifty.controls.ListBox;
+import de.lessvoid.nifty.controls.ListBoxSelectionChangedEvent;
+import de.lessvoid.nifty.controls.Window;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.elements.render.ImageRenderer;
+import de.lessvoid.nifty.elements.render.TextRenderer;
+import de.lessvoid.nifty.input.NiftyInputEvent;
+import de.lessvoid.nifty.render.NiftyImage;
+import de.lessvoid.nifty.screen.KeyInputHandler;
+import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.nifty.tools.SizeValue;
+import halemaster.ee.localization.Localizer;
+import halemaster.ee.quest.Offer;
+import halemaster.ee.quest.Quest;
+import halemaster.ee.world.entity.Entity;
+import halemaster.ee.world.entity.EntityType;
+import halemaster.ee.world.entity.Statistic;
+import halemaster.ee.world.micro.AreaGenerator;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
+/**
+ * @name Hud
+ * 
+ * @version 0.0.0
+ * 
+ * @date Oct 24, 2013
+ */
+public class Hud extends Menu implements KeyInputHandler
+{
+  public static final float TARGET_DISTANCE = 64f * AreaGenerator.TILE_WIDTH;
+  public static final String FILE = "Interface/menu/hud.xml";
+  public static final String ID = "hud";
+  public static final String INITIAL_OUTPUT = "You've opened the console. "
+          + "You can type commands here.";
+  public static final String ERROR = "ERROR: ";
+  public static final String USAGE = "USAGE: ";
+  public static final String INVALID_COMMAND = "Invalid Command";
+  public static final String TALK = "hud.talk";
+  public static final String KILL = "hud.kill";
+  public static final String PICKUP = "hud.item";
+  
+  private PlayerState player;
+  private Entity target;
+  private List<String> titles;
+  private List<String> descriptions;
+  private List<String> requirements;
+  private List<String> previousCommands = new ArrayList<String> ();
+  private int currentCommand = 0;
+  private boolean consoleVisible = false;
+  private boolean allowConsoleToggle = true;
+  private boolean firstConsoleShow = true;
+  private Element consolePopup;
+  private ConcurrentLinkedQueue<Entity> addedUsers = 
+          new ConcurrentLinkedQueue<Entity> ();
+  private ConcurrentLinkedQueue<Entity> removedUsers = 
+          new ConcurrentLinkedQueue<Entity> ();
+  
+  public Hud (PlayerState player)
+  {
+    super (FILE, ID);
+    
+    this.player = player;
+  }
+  
+  @Override
+  public void bind (final Nifty newNifty, final Screen newScreen)
+  {
+    super.bind (newNifty, newScreen);
+    
+    newScreen.addKeyboardInputHandler (new HudMapping (), this);
+    this.consolePopup = newNifty.createPopup ("consolePopup");
+  }
+  
+  /**
+   * Initialize this menu.
+   * 
+   * @param manager manager to initialize with.
+   * @param app application to initialize with.
+   */
+  @Override
+  public void initialize (AppStateManager manager, Application app)
+  {
+    Label playerName;
+    Element playerImage;
+    Window characterWindow, invWindow, questWindow;
+    NiftyImage playerNiftyImage;
+    Element characterImage;
+    Element targetPanel;
+    
+    super.initialize (manager, app);
+    
+    playerName = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("player_name", Label.class);
+    playerImage = getNifty ().getCurrentScreen ().findElementByName 
+            ("player_image");
+    characterImage = getNifty ().getCurrentScreen ().findElementByName 
+            ("window_character_player_image");
+    characterWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_character", Window.class);
+    invWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_inventory", Window.class);
+    questWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_quest", Window.class);
+    targetPanel = getNifty ().getCurrentScreen ().findElementByName ("target");
+    playerNiftyImage = getNifty ()
+            .createImage (this.player.getPlayerImage (), false);
+    
+    targetPanel.hide ();
+    
+    playerName.setText (this.player.getPlayerName ());
+    playerImage.getRenderer (ImageRenderer.class).setImage (playerNiftyImage); 
+    characterImage.getRenderer (ImageRenderer.class).setImage (playerNiftyImage); 
+    characterWindow.getElement ().hide ();
+    characterWindow.setTitle (this.player.getPlayerName ());
+    invWindow.getElement ().hide ();
+    questWindow.getElement ().hide ();
+  }
+  
+  public String getWidthPercent (String percent, String width)
+  {
+    return String.valueOf ((int) (this.player.getGame ().getCamera ()
+            .getWidth () * (Float.valueOf (percent) / 100) - 
+            Integer.valueOf (width)));
+  }
+  
+  public String getHeightPercent (String percent, String height)
+  {
+    return String.valueOf ((int) (this.player.getGame ().getCamera ()
+            .getHeight () * (Float.valueOf (percent) / 100) - 
+            Integer.valueOf (height)));
+  }
+  
+  /**
+   * Updates the hud with new information, if any exists.
+   */
+  public void update ()
+  {
+    ListBox questList = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("questLog", ListBox.class);
+    Label title, description, requirement;
+    HealthBarControl playerHealth, targetHealth;
+    Offer offer;
+    float health;
+    
+    if (null != this.target && this.target.getAbsoluteLocation ()
+            .distance (this.player.getPlayer ().getAbsoluteLocation ())
+            > TARGET_DISTANCE)
+    {
+      setTarget (null);
+    }
+    
+    if (this.player.questChanged ())
+    {
+      questList.clear ();
+      this.titles = new ArrayList<String> ();
+      this.descriptions = new ArrayList<String> ();
+      this.requirements = new ArrayList<String> ();
+      for (Quest quest : this.player.getQuests ())
+      {
+        offer = Offer.getOffer (quest.getOfferId (), null);
+        questList.addItem (offer.getTitle ());
+        this.titles.add (offer.getTitle ());
+        this.descriptions.add (offer.getDescription ());
+        String tempReqs = "";
+        for (String talk : offer.getRequirements ().getTalkNames ())
+        {
+          tempReqs += Localizer.getString (TALK, (Object) talk) + "\n";
+        }
+        for (String kill : offer.getRequirements ().getKillNames ())
+        {
+          tempReqs += Localizer.getString (KILL, offer
+                  .getRequirements ().getKillCount (kill) - quest
+                  .getFinishedRequirements ().getKillCount (kill), offer
+                  .getRequirements ().getKillCount (kill), kill) + "\n";
+        }
+        for (String item : offer.getRequirements ().getItemNames ())
+        {
+          tempReqs += Localizer.getString (PICKUP, offer
+                  .getRequirements ().getItemCount (item) - quest
+                  .getFinishedRequirements ().getItemCount (item), offer
+                  .getRequirements ().getItemCount (item), item) + "\n";
+        }
+        this.requirements.add (tempReqs);
+      }
+      title = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("currentQuestTitle", Label.class);
+      description = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("currentQuestDescription", Label.class);
+      requirement = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("questRequirements", Label.class);
+      if (this.titles.size () > 0 && this.descriptions.size () > 0 &&
+              this.requirements.size () > 0)
+      {
+        questList.selectItemByIndex (0);
+        title.setText (this.titles.get (0));
+        description.setText (this.descriptions.get (0));
+        requirement.setText (this.requirements.get (0));
+      }
+      else
+      {
+        title.setText ("");
+        description.setText ("");
+        requirement.setText ("");
+      }
+    }
+    
+    playerHealth = getNifty ().getCurrentScreen ()
+            .findControl ("player_health", HealthBarControl.class);
+    health = (float) this.player.getPlayer ().getCurrentHp () / 
+            (float) this.player.getPlayer ().getStat (Statistic.HEALTH);
+    playerHealth.setHealthPercent (health);
+    
+    if (this.target != null)
+    {
+      targetHealth = getNifty ().getCurrentScreen ()
+            .findControl ("target_health", HealthBarControl.class);
+      health = (float) this.target.getCurrentHp () / 
+              (float) this.target.getStat (Statistic.HEALTH);
+      targetHealth.setHealthPercent (health);
+    }
+    
+    while (!this.addedUsers.isEmpty ())
+    {
+      finalizeAddChatUser (this.addedUsers.poll ());
+    }
+    
+    while (!this.removedUsers.isEmpty ())
+    {
+      finalizeRemoveChatUser (this.removedUsers.poll ());
+    }
+  }
+  
+  /**
+   * toggle opening of the character window
+   * 
+   * @return whether the input event was used up
+   */
+  public boolean openCharacter ()
+  {
+    Element characterWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_character", Window.class).getElement ();    
+    
+    if (characterWindow.isVisible ())
+    {
+      characterWindow.hide ();
+    }
+    else
+    {      
+      updateCharacterWindow ();
+      characterWindow.show ();
+    }
+    
+    return true;
+  }
+  
+  /**
+   * toggle opening of the inventory window
+   * 
+   * @return whether the input event was used up
+   */
+  public boolean openInventory ()
+  {
+    Element inventoryWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_inventory", Window.class).getElement ();
+    
+    if (inventoryWindow.isVisible ())
+    {
+      inventoryWindow.hide ();
+    }
+    else
+    {
+      inventoryWindow.show ();
+    }
+    
+    return true;
+  }
+  
+  /**
+   * toggle opening of the quest log window
+   * 
+   * @return whether the input event was used up
+   */
+  public boolean openQuestLog ()
+  {
+    Element questWindow = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("window_quest", Window.class).getElement ();
+    
+    if (questWindow.isVisible ())
+    {
+      questWindow.hide ();
+    }
+    else
+    {
+      questWindow.show ();
+    }
+    
+    return true;
+  }
+  
+  /**
+   * Attempt to add a point to power
+   * @return whether the event was consumed
+   */
+  public boolean addPower ()
+  {
+    addStat (Statistic.POWER);
+    
+    return true;
+  }
+  
+  /**
+   * Attempt to add a point to agility
+   * @return whether the event was consumed
+   */
+  public boolean addAgility ()
+  {
+    addStat (Statistic.AGILITY);
+    
+    return true;
+  }
+  
+  /**
+   * Attempt to add a point to intellect
+   * @return whether the event was consumed
+   */
+  public boolean addIntellect ()
+  {
+    addStat (Statistic.INTELLECT);
+    
+    return true;
+  }
+  
+  /**
+   * Attempt to add a point to the given stat
+   * @param stat stat to add to
+   */
+  public void addStat (Statistic stat)
+  {
+    if (this.player.getPlayer ().spendStat (stat))
+    {
+      updateCharacterWindow ();
+    }
+  }
+  
+  /**
+   * Update the character window with new data.
+   */
+  public void updateCharacterWindow ()
+  {
+    Label charName, charLevel, charXp, charHealth, charPower, charAgility,
+            charIntellect, charArmor, charCraft, charDamage, charAccuracy, 
+            charCritical, charPoints, charHaste;
+    
+    charName = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_name", Label.class);
+    charPoints = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_points", Label.class);
+    charLevel = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_level", Label.class);
+    charXp = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_xp", Label.class);
+    charHealth = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_health", Label.class);
+    charPower = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_power", Label.class);
+    charAgility = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_agility", Label.class);
+    charIntellect = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_intellect", Label.class);
+    charArmor = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_armor", Label.class);
+    charCraft = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_craft", Label.class);
+    charDamage = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_damage", Label.class);
+    charAccuracy = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_accuracy", Label.class);
+    charCritical = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_critical", Label.class);
+    charHaste = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("char_haste", Label.class);
+
+    charName.setText (this.player.getPlayer ().getName ());
+    charName.setWidth (new SizeValue (charName.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charLevel.setText (String.valueOf (this.player.getPlayer ().getStat 
+            (Statistic.LEVEL)));
+    charLevel.setWidth (new SizeValue (charLevel.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charXp.setText (this.player.getPlayer ().getStat (Statistic.XP) + " / " + 
+            Entity.XP_LEVEL);
+    charXp.setWidth (new SizeValue (charXp.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charPoints.setText (String.valueOf (this.player.getPlayer ()
+            .getStatPoints ()));
+    charPoints.setWidth (new SizeValue (charPoints.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charHealth.setText (this.player.getPlayer ().getCurrentHp ()+ " / " + 
+            this.player.getPlayer ().getStat (Statistic.HEALTH));
+    charHealth.setWidth (new SizeValue (charHealth.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charPower.setText (String.valueOf(this.player.getPlayer ().getStat 
+            (Statistic.POWER)));
+    charPower.setWidth (new SizeValue (charPower.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charAgility.setText (String.valueOf(this.player.getPlayer ().getStat 
+            (Statistic.AGILITY)));
+    charAgility.setWidth (new SizeValue (charAgility.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charIntellect.setText (String.valueOf(this.player.getPlayer ().getStat 
+            (Statistic.INTELLECT)));
+    charIntellect.setWidth (new SizeValue (charIntellect.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charArmor.setText (String.valueOf (this.player.getPlayer ()
+            .getStat (Statistic.ARMOR)));
+    charArmor.setWidth (new SizeValue (charArmor.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charCritical.setText (String.valueOf (this.player.getPlayer ()
+            .getStat (Statistic.CRITICAL)) + "%");
+    charCritical.setWidth (new SizeValue (charCritical.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charCraft.setText (String.valueOf (this.player.getPlayer ()
+            .getStat (Statistic.CRAFT)));
+    charCraft.setWidth (new SizeValue (charCraft.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charAccuracy.setText (String.valueOf (this.player.getPlayer ()
+            .getStat (Statistic.ACCURACY)));
+    charAccuracy.setWidth (new SizeValue (charAccuracy.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charDamage.setText (this.player.getPlayer ()
+            .getStat (Statistic.STRIKE_LOWER) + " - " + 
+            this.player.getPlayer ().getStat (Statistic.STRIKE_UPPER));
+    charDamage.setWidth (new SizeValue (charDamage.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    charHaste.setText (String.valueOf (this.player.getPlayer ()
+            .getStat (Statistic.HASTE)));
+    charHaste.setWidth (new SizeValue (charHaste.getElement ().getRenderer 
+            (TextRenderer.class).getTextWidth () + "px"));
+    
+    charName.getElement ().getParent ().getParent ().getParent().getParent()
+            .layoutElements ();
+  }
+  
+  /**
+   * Called when the player submits text
+   * @param id id of the chat box
+   * @param event event submitted.
+   */
+  @NiftyEventSubscriber(id="chatArea")
+  public final void onSendText(final String id, final ChatTextSendEvent event) 
+  {
+    if (!event.getText().isEmpty ()) 
+    {
+      chatLine (this.player.getPlayer (), event.getText ());
+    }
+  }
+  
+  /**
+   * Add a user to the chat adding queue
+   * @param user user to add
+   */
+  public void addChatUser (Entity user)
+  {
+    if (null != user)
+    {
+      this.addedUsers.add (user);
+    }
+  }
+  
+  /**
+   * Add a user to the chat removing queue
+   * @param user user to remove
+   */
+  public void removeChatUser (Entity user)
+  {
+    if (null != user)
+    {
+      this.removedUsers.add (user);
+    }
+  }
+  
+  /**
+   * add a user to the chat
+   * @param user user to add
+   */
+  private void finalizeAddChatUser (Entity user)
+  {
+    if (user.getType ().equals (EntityType.NPC.getId ()) || 
+            user.getType ().equals (EntityType.PLAYER.getId ()))
+    {
+      if (null != getNifty () && null != getNifty ().getCurrentScreen ())
+      {
+        final Chat chat = getNifty ().getCurrentScreen ()
+                .findNiftyControl("chatArea", Chat.class);
+        if (null != chat)
+        {
+          chat.addPlayer(user.getName (), getNifty ()
+                  .createImage (user.getBasicImage (), false));
+        }
+        else
+        {
+          this.addedUsers.add (user);
+        }
+      }
+      else
+      {
+        this.addedUsers.add (user);
+      }
+    }
+  }
+  
+  /**
+   * Remove a user from the chat
+   * @param user user to remove
+   */
+  private void finalizeRemoveChatUser (Entity user)
+  {
+    if (user.getType ().equals (EntityType.NPC.getId ()) || 
+            user.getType ().equals (EntityType.PLAYER.getId ()))
+    {
+      if (null != getNifty () && null != getNifty ().getCurrentScreen ())
+      {
+        final Chat chat = getNifty ().getCurrentScreen ()
+                .findNiftyControl("chatArea", Chat.class);
+        if (null != chat)
+        {
+          chat.removePlayer (user.getName ());
+        }
+        else
+        {
+          this.removedUsers.add (user);
+        }
+      }
+      else
+      {
+        this.removedUsers.add (user);
+      }
+    }
+  }
+  
+  /**
+   * Add a line of chat from the given user
+   * @param user user of the chat
+   * @param line line from that user
+   */
+  public void chatLine (Entity user, String line)
+  {
+    if (null != getNifty () && null != getNifty ().getCurrentScreen ())
+    {
+      final Chat chat = getNifty ().getCurrentScreen ()
+              .findNiftyControl("chatArea", Chat.class);
+      if (null != chat)
+      {
+        chat.receivedChatLine (user.getName () + "> " + line, getNifty ()
+                .createImage (user.getBasicImage (), false));
+      }
+    }
+  }
+  
+  public Entity getTarget ()
+  {
+    return this.target;
+  }
+  
+  /**
+   * Set the target in the HUD
+   * @param target the target in the hud
+   */
+  public void setTarget (Entity target)
+  {
+    Element targetPanel;
+    Label targetName;
+    Element targetImage;
+    NiftyImage targetNiftyImage;
+    
+    this.target = target;
+    
+    targetPanel = getNifty ().getCurrentScreen ().findElementByName ("target");
+    
+    if (null == this.target)
+    {
+      targetPanel.hide ();
+    }
+    else
+    {
+      targetPanel.show ();
+      
+      targetName = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("target_name", Label.class);
+      targetImage = getNifty ().getCurrentScreen ().findElementByName 
+            ("target_image");
+      targetNiftyImage = getNifty ()
+            .createImage (this.target.getBasicImage (), false);
+      
+      targetName.setText (this.target.getName ());
+      targetImage.getRenderer (ImageRenderer.class).setImage (targetNiftyImage); 
+    }
+  }
+  
+  @NiftyEventSubscriber (id="questLog")
+  public void onQuestLogChanged (final String id, 
+          final ListBoxSelectionChangedEvent<String> event)
+  {
+    Label title, description, requirement;
+    List<Integer> selections = event.getSelectionIndices ();
+    Integer selection;
+    
+    if (selections.size () > 0)
+    {
+      selection = selections.get (0);
+      title = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("currentQuestTitle", Label.class);
+      description = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("currentQuestDescription", Label.class);
+      requirement = getNifty ().getCurrentScreen ()
+              .findNiftyControl ("questRequirements", Label.class);
+      title.setText (this.titles.get (selection));
+      description.setText (this.descriptions.get (selection));
+      requirement.setText (this.requirements.get (selection));
+    }
+  }
+  
+  /**
+   * Key input event for console toggle
+   * @author nifty-gui example code
+   * @param inputEvent nifty input event
+   * @return whether the event was used
+   */
+  public boolean keyEvent (final NiftyInputEvent inputEvent)
+  {
+    boolean consumed = false;
+    if (inputEvent == NiftyInputEvent.ConsoleToggle)
+    {
+      toggleConsole ();
+      consumed = true;
+    }
+    else if (inputEvent == NiftyInputEvent.MoveCursorUp)
+    {
+      if (this.consoleVisible)
+      {
+        Console console = getScreen ().findNiftyControl ("console", Console.class);
+        if (this.previousCommands.size () > this.currentCommand)
+        {
+          console.getTextField ().setText (this.previousCommands
+                  .get (this.currentCommand));
+          this.currentCommand++;
+        }
+        consumed = true;
+      }
+    }
+    else if (inputEvent == NiftyInputEvent.MoveCursorDown)
+    {
+      if (this.consoleVisible)
+      {
+        Console console = getScreen ().findNiftyControl ("console", Console.class);
+        if (0 < this.currentCommand && 0 < this.previousCommands.size ())
+        {
+          this.currentCommand--;
+          console.getTextField ().setText (this.previousCommands
+                  .get (this.currentCommand));
+        }
+        consumed = true;
+      }
+    }
+    else if (inputEvent == NiftyInputEvent.NextInputElement)
+    {
+      if (this.consoleVisible)
+      {
+        Console console = getScreen ().findNiftyControl ("console", Console.class);
+        console.getTextField ().setText (Command.getLongestPrefix 
+                  (console.getTextField ().getDisplayedText ()));
+        console.getTextField ().setFocus ();
+        console.getTextField ().setCursorPosition (console.getTextField ()
+                .getDisplayedText ().length ());
+        consumed = true;
+      }
+    }
+    
+    return consumed;
+  }
+  
+  /**
+   * Toggle the console.
+   * @author nifty-gui examples
+   */
+  public void toggleConsole ()
+  {
+    if (allowConsoleToggle)
+    {
+      allowConsoleToggle = false;
+      if (consoleVisible)
+      {
+        closeConsole ();
+      }
+      else
+      {
+        openConsole ();
+      }
+    }
+  }
+  
+  /**
+   * Open the console.
+   * @author nifty-gui examples
+   */
+  private void openConsole ()
+  {
+    getNifty ().showPopup (getScreen (), this.consolePopup.getId (), 
+            this.consolePopup.findElementByName ("console#textInput"));
+    getScreen ().processAddAndRemoveLayerElements ();
+    
+    if (this.firstConsoleShow)
+    {
+      this.firstConsoleShow = false;
+      Console console = getScreen ().findNiftyControl ("console", Console.class);
+      console.output (INITIAL_OUTPUT);
+    }
+    
+    this.consoleVisible = true;
+    this.allowConsoleToggle = true;
+  }
+  
+  /**
+   * Close the console.
+   * @author nifty-gui examples
+   */
+  private void closeConsole ()
+  {
+    getNifty ().closePopup (this.consolePopup.getId (), new EndNotify ()
+    {
+      @Override
+      public void perform ()
+      {
+        consoleVisible = false;
+        allowConsoleToggle = true;
+      }
+    });
+  }
+  
+  /**
+   * Execute a console command
+   * @param id id of the console
+   * @param command command event executed
+   */
+  @NiftyEventSubscriber (id="console")
+  public void onConsoleCommand (final String id, 
+          final ConsoleExecuteCommandEvent commandEvent)
+  {
+    Console console = getScreen ().findNiftyControl ("console", Console.class);
+    Command command = Command.findCommand (commandEvent.getCommand ());
+    String commandFull = commandEvent.getCommand ();
+    
+    for (String arg : commandEvent.getArguments ())
+    {
+      commandFull += " " + arg;
+    }
+    
+    this.previousCommands.add (0, commandFull);
+    this.currentCommand = 0;
+    
+    if (null != command)
+    {
+      if (!command.execute (commandEvent.getArguments (), this.player, console))
+      {
+        printError (console, USAGE + command.getUsage ());
+      }
+    }
+    else
+    {
+      printError (console, INVALID_COMMAND);
+    }
+  }
+  
+  /**
+   * Print an error to the console
+   * @param console console to print to
+   * @param error error to print
+   */
+  private void printError (Console console, String error)
+  {
+    console.outputError (ERROR + error);
+  }
+}

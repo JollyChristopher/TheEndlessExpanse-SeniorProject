@@ -1,0 +1,335 @@
+package halemaster.ee.world.faction;
+
+import halemaster.ee.world.Area;
+import halemaster.ee.world.Biome;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Queue;
+import java.util.Random;
+import java.util.Set;
+
+/**
+ * @name Settlement
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 9, 2013
+ */
+public class Settlement 
+{
+  public static final int MOVEMENT = 50;
+  private static Set<Area> takenAreas = new HashSet<Area> ();
+  private String name;
+  private transient Faction faction;
+  private int population;
+  private Set<Area> areas = new HashSet<Area> ();
+  private HashMap<Area, List<String>> npcs = new HashMap<Area, List<String>>();
+  
+  public static Area getNewCenter (Random random, Biome[][] biomes)
+  {
+    Area area = null;
+    Area currentPoint = new Area (random.nextInt (biomes.length), 
+            random.nextInt (biomes.length));
+    Area nextPoint;
+    Queue<Area> next = new ArrayDeque<Area> ();
+    Set<Area> visitedUsable = new HashSet<Area> ();
+    Set<Area> visitedUnusable = new HashSet<Area> ();
+    
+    while (null == area)
+    {
+      if (0 < biomes[currentPoint.getX ()][currentPoint.getY ()]
+              .getHabituality ())
+      {
+        visitedUsable.add (currentPoint);
+      }
+      else
+      {
+        visitedUnusable.add (currentPoint);
+      }
+      
+      nextPoint = new Area (currentPoint.getX () + MOVEMENT, 
+              currentPoint.getY ());
+      if (0 <= nextPoint.getX () && biomes.length > nextPoint.getX () &&
+              0 <= nextPoint.getY () && biomes.length > nextPoint.getY () &&
+              !visitedUsable.contains (nextPoint) && 
+              !visitedUnusable.contains (nextPoint) && 
+              !next.contains (nextPoint) && !takenAreas.contains (nextPoint))
+      {
+        next.add (nextPoint);
+      }
+      nextPoint = new Area (currentPoint.getX () - MOVEMENT, 
+              currentPoint.getY ());
+      if (0 <= nextPoint.getX () && biomes.length > nextPoint.getX () &&
+              0 <= nextPoint.getY () && biomes.length > nextPoint.getY () &&
+              !visitedUsable.contains (nextPoint) && 
+              !visitedUnusable.contains (nextPoint) && 
+              !next.contains (nextPoint) && !takenAreas.contains (nextPoint))
+      {
+        next.add (nextPoint);
+      }
+      nextPoint = new Area (currentPoint.getX (), 
+              currentPoint.getY () - MOVEMENT);
+      if (0 <= nextPoint.getX () && biomes.length > nextPoint.getX () &&
+              0 <= nextPoint.getY () && biomes.length > nextPoint.getY () &&
+              !visitedUsable.contains (nextPoint) && 
+              !visitedUnusable.contains (nextPoint) && 
+              !next.contains (nextPoint) && !takenAreas.contains (nextPoint))
+      {
+        next.add (nextPoint);
+      }
+      nextPoint = new Area (currentPoint.getX (), 
+              currentPoint.getY () + MOVEMENT);
+      if (0 <= nextPoint.getX () && biomes.length > nextPoint.getX () &&
+              0 <= nextPoint.getY () && biomes.length > nextPoint.getY () &&
+              !visitedUsable.contains (nextPoint) && 
+              !visitedUnusable.contains (nextPoint) && 
+              !next.contains (nextPoint) && !takenAreas.contains (nextPoint))
+      {
+        next.add (nextPoint);
+      }
+      
+      for (Area usable : visitedUsable)
+      {
+        if (random.nextInt (Byte.MAX_VALUE) < 
+                biomes[usable.getX ()][usable.getY ()].getHabituality ())
+        {
+          area = usable;
+        }
+      }
+      
+      if (next.isEmpty ())
+      {
+        int newX = currentPoint.getX () + 1;
+        int newY = currentPoint.getY () + 1;
+        
+        if (newX >= biomes.length)
+        {
+          newX -= 2;
+        }
+        if (newY >= biomes.length)
+        {
+          newY -= 2;
+        }
+        
+        nextPoint = new Area (newX, newY);
+        next.add (nextPoint);
+      }
+      
+      currentPoint = next.poll ();
+    }
+    
+    return area;
+  }
+  
+  public Settlement (String name, Faction faction)
+  {
+    if (null == name)
+    {
+      throw new NullPointerException ("name");
+    }
+    
+    this.name = name;
+    this.faction = faction;
+  }
+  public String getName ()
+  {
+    return this.name;
+  }
+
+  public Faction getFaction ()
+  {
+    return this.faction;
+  }
+
+  public int getPopulation ()
+  {
+    return this.population;
+  }
+
+  public void setPopulation (int size)
+  {
+    this.population = size;
+  }
+  
+  public void addNPC (String name, Area location)
+  {
+    List<String> npcsAtLoc = this.npcs.get (location);
+    if (null == npcsAtLoc)
+    {
+      npcsAtLoc = new ArrayList<String>();
+      this.npcs.put (location, npcsAtLoc);
+    }
+    
+    npcsAtLoc.add (name);
+  }
+  
+  public void removeNPC (String name)
+  {
+    for (Entry<Area, List<String>> area : this.npcs.entrySet ())
+    {
+      area.getValue ().remove (name);
+    }
+  }
+  
+  public List<String> getNPCs (Area location)
+  {
+    return this.npcs.get (location);
+  }
+
+  /**
+   * Get all areas this settlement is made of.
+   * 
+   * @return array of areas this settlement spans.
+   */
+  public Area[] getAreas ()
+  {
+    Area[] areaArray = new Area[this.areas.size ()];
+    this.areas.toArray (areaArray);
+    return areaArray;
+  }
+  
+  /**
+   * Add a new area for this settlement. If the area already exists, it is not
+   * added a second time.
+   * 
+   * @param x x of the area.
+   * @param y y of the area.
+   */
+  public void addArea (int x, int y)
+  {
+    Area area = new Area (x, y);
+    this.areas.add (area);
+    takenAreas.add (area);
+  }
+
+  /**
+   * Remove the area from this settlment at the given coordinates.
+   * 
+   * @param x x of the area.
+   * @param y y of the area.
+   * @return the area at the given location, or null if it isn't in this 
+   *         Settlement.
+   */
+  public Area removeArea (int x, int y)
+  {
+    Area removed = null;
+    Area tempArea = new Area (x, y);
+    
+    for (Area area : getAreas ())
+    {
+      if (area.equals (tempArea))
+      {
+        removed = area;
+        this.areas.remove (removed);
+        takenAreas.remove (removed);
+      }
+    }
+    
+    return removed;
+  }
+  
+  public Area getGrowth (Random random, Biome[][] biomes)
+  {
+    Area area = null;
+    Area currentPoint;
+    Area nextPoint;
+    List<Area> visitedUsable = new ArrayList<Area> ();
+    Set<Area> visitedUnusable = new HashSet<Area> ();
+    
+    for (Area temp : this.areas)
+    {
+      visitedUnusable.add (temp);
+    }
+    
+    for (Area temp : this.areas)
+    {
+      nextPoint = new Area (temp.getX () + 1, temp.getY ());
+      if (0 <= nextPoint.getX () && 0 <= nextPoint.getY () 
+              && biomes.length > nextPoint.getX () 
+              && biomes.length > nextPoint.getY ()&&
+              0 < biomes[nextPoint.getX ()][nextPoint.getY ()].getHabituality ()
+              && !visitedUnusable.contains (nextPoint)
+              && !takenAreas.contains (nextPoint))
+      {
+        visitedUsable.add (nextPoint);
+      }
+      nextPoint = new Area (temp.getX () - 1, temp.getY ());
+      if (0 <= nextPoint.getX () && 0 <= nextPoint.getY () 
+              && biomes.length > nextPoint.getX () 
+              && biomes.length > nextPoint.getY () &&
+              0 < biomes[nextPoint.getX ()][nextPoint.getY ()].getHabituality ()
+              && !visitedUnusable.contains (nextPoint)
+              && !takenAreas.contains (nextPoint))
+      {
+        visitedUsable.add (nextPoint);
+      }
+      nextPoint = new Area (temp.getX (), temp.getY () + 1);
+      if (0 <= nextPoint.getX () && 0 <= nextPoint.getY () 
+              && biomes.length > nextPoint.getX () 
+              && biomes.length > nextPoint.getY () &&
+              0 < biomes[nextPoint.getX ()][nextPoint.getY ()].getHabituality ()
+              && !visitedUnusable.contains (nextPoint)
+              && !takenAreas.contains (nextPoint))
+      {
+        visitedUsable.add (nextPoint);
+      }
+      nextPoint = new Area (temp.getX (), temp.getY () - 1);
+      if (0 <= nextPoint.getX () && 0 <= nextPoint.getY () 
+              && biomes.length > nextPoint.getX () 
+              && biomes.length > nextPoint.getY () &&
+              0 < biomes[nextPoint.getX ()][nextPoint.getY ()].getHabituality ()
+              && !visitedUnusable.contains (nextPoint)
+              && !takenAreas.contains (nextPoint))
+      {
+        visitedUsable.add (nextPoint);
+      }
+    }
+    
+    if (!visitedUsable.isEmpty ())
+    {
+      area = visitedUsable.get (random.nextInt (visitedUsable.size ()));
+    }
+    
+    return area;
+  }
+  
+  /**
+   * Determine if equals another Settlement.
+   * 
+   * @param obj object to compare to.
+   * @return if the object equals this object.
+   */
+  @Override
+  public boolean equals (Object obj)
+  {
+    if (obj instanceof Settlement)
+    {
+      Settlement set = (Settlement) obj;
+      
+      return (set.getName ().equals (getName ()) && 
+              getFaction () == set.getFaction ());
+    }
+    else
+    {
+      return false;
+    }
+  }
+
+  /**
+   * Get hashcode fo this Settlement. Used for the above equals.
+   * 
+   * @return hashcode for this Settlement.
+   */
+  @Override
+  public int hashCode ()
+  {
+    int hash = 7;
+    hash = 53 * hash + (this.name != null ? this.name.hashCode () : 0);
+    hash = 53 * hash + (this.faction != null ? this.faction.hashCode () : 0);
+    return hash;
+  }
+}

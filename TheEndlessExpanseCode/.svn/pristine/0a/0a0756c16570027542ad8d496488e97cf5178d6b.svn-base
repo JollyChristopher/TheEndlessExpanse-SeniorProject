@@ -1,0 +1,67 @@
+package halemaster.ee.world.history.event;
+
+import halemaster.ee.Json;
+import halemaster.ee.world.history.event.type.EventType;
+import halemaster.ee.world.history.event.type.EventTypeHolder;
+import java.io.File;
+import java.io.IOException;
+
+/**
+ * @name EventIO
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class EventIO 
+{
+  /**
+   * Get the types from the Json file.
+   * 
+   * @param file file to get types from.
+   * @return all types as an array.
+   * @throws IOException 
+   */
+  public static EventType[] getTypes (File file) throws IOException
+  {
+    return Json.getFromFile (file, EventType.class);
+  }
+  
+  public static EventHolder getEvents (File file, EventTypeHolder[] types) 
+          throws IOException,
+          InstantiationException, IllegalAccessException
+  {
+    Event[] inOrderEvents = Json.getFromFile (file, Event.class);
+    EventHolder holder = new EventHolder ();
+    
+    for (int i = 0; i < types.length; i++)
+    {
+      holder.addTypeHolder (types[i]);
+    }
+    
+    for (int i = 0; i < inOrderEvents.length; i++)
+    {
+      inOrderEvents[i].shake ();
+      inOrderEvents[i].setHolder (holder);
+      holder.addEvent (inOrderEvents[i], inOrderEvents[i].getLock ());
+    }
+    
+    return holder;
+  }
+  
+  public static void saveEvents (EventHolder holder, File file) throws 
+          IOException
+  {
+    Event[] inOrderEvents;
+    
+    inOrderEvents = holder.getEvents (0, Integer.MAX_VALUE, 0, Integer.MAX_VALUE
+            , 0, Integer.MAX_VALUE);
+    
+    for (int i = 0; i < inOrderEvents.length; i++)
+    {
+      inOrderEvents[i].unShake ();
+    }
+    
+    Json.saveJson (file, inOrderEvents);
+  }
+}

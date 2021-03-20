@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty xmlns="http://nifty-gui.sourceforge.net/nifty-1.3.xsd" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xsi:schemaLocation="http://nifty-gui.sourceforge.net/nifty-1.3.xsd 
+http://nifty-gui.sourceforge.net/nifty-1.3.xsd">
+  <resourceBundle id="main" filename="halemaster.ee.localization.Bundle" />
+  <useStyles filename="Interface/TEEStyle.xml" />
+  <useControls filename="nifty-default-controls.xml" />
+  <style id="my-scrollpanel#scrollpanel">
+    <attributes backgroundColor="#0000"></attributes>
+    <effect overlay="true">
+      <onActive name="imageOverlay" filename="blackborder.png" 
+                imageMode="resize:1,30,1,1,1,30,1,1,1,30,1,1" post="true">
+      </onActive>
+    </effect>
+  </style>
+  <style id="my-scrollpanel#bottom-right">
+    <attributes width="23px" height="23px"></attributes>
+  </style>
+  <!-- +++++++++++++++++++++++++++++++++++++++ -->
+  <!-- start screen -->
+  <!-- +++++++++++++++++++++++++++++++++++++++ -->
+  <screen id="start" controller="halemaster.ee.state.start.MenuStart">
+    <layer id="main-layer" childLayout="vertical" height="100%" width="100%">
+      <panel id="title" height="20%" width="100%" align="center"
+             valign="center" childLayout="center" visibleToMouse="true">
+        <text text='${main.game.title}' font="Interface/Fonts/Default.fnt"
+              width="100%" height="100%" />
+      </panel>
+      <panel id="blank" height="10%" width="100%" align="center" valign="center"
+             childLayout="center" visibleToMouse="true">
+      </panel>
+      <panel id="play" height="20%" width="100%" align="center" valign="center"
+             childLayout="center" visibleToMouse="true">
+          <control name="button" label="${main.game.menu.play}" id="PlayButton" 
+                   align="center" valign="center" height="100%" width="30%"> 
+            <interact onClick="world()"/>
+          </control>
+      </panel>
+      <panel id="blank" height="15%" width="100%" align="center" valign="center"
+             childLayout="center" visibleToMouse="true">
+      </panel>
+      <panel id="Options" height="20%" width="100%" align="center" valign="center"
+             childLayout="center" visibleToMouse="true">
+          <control name="button" label="${main.game.menu.options}" 
+                   id="OptButton" align="center" valign="center" height="100%" 
+                   width="30%"> 
+            <interact onClick="options()"/>
+          </control>
+      </panel>
+    </layer>
+  </screen>
+</nifty>

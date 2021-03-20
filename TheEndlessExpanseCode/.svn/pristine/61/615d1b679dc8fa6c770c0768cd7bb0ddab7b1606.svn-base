@@ -1,0 +1,153 @@
+package halemaster.ee.quest;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * @name Requirement
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ */
+public class Requirement 
+{
+  private Map<String, Integer> kill = new HashMap<String, Integer>();
+  private Map<String, Integer> items = new HashMap<String, Integer>();
+  private Set<String> npcToTalkTo = new HashSet<String>();
+
+  public String[] getKillNames ()
+  {
+    String[] killNames = new String[this.kill.size ()];
+    int index = 0;
+    
+    for (String killName : this.kill.keySet ())
+    {
+      killNames[index] = killName;
+      index++;
+    }
+    
+    return killNames;
+  }
+  
+  public int getKillCount (String name)
+  {
+    return this.kill.get (name);
+  }
+  
+  public boolean checkKillEmpty ()
+  {
+    return this.kill.isEmpty ();
+  }
+  
+  public void addKill (String name, int value)
+  {
+    Integer killCount = this.kill.get (name);
+    
+    if (null == killCount)
+    {
+      killCount = 0;
+    }
+    
+    this.kill.put (name, killCount + value);
+  }
+  
+  public void subtractKill (String name, int value)
+  {
+    addKill (name, -value);
+  }
+  
+  public String[] getItemNames ()
+  {
+    String[] itemNames = new String[this.items.size ()];
+    int index = 0;
+    
+    for (String itemName : this.items.keySet ())
+    {
+      itemNames[index] = itemName;
+      index++;
+    }
+    
+    return itemNames;
+  }
+  
+  public int getItemCount (String name)
+  {
+    return this.items.get (name);
+  }
+  
+  public boolean checkItemEmpty ()
+  {
+    return this.items.isEmpty ();
+  }
+  
+  public void addItem (String name, int value)
+  {
+    Integer itemCount = this.items.get (name);
+    
+    if (null == itemCount)
+    {
+      itemCount = 0;
+    }
+    
+    this.items.put (name, itemCount + value);
+  }
+  
+  public void subtractItem (String name, int value)
+  {
+    addItem (name, -value);
+  }
+  
+  public String[] getTalkNames ()
+  {
+    String[] talkNames = new String[this.npcToTalkTo.size ()];
+    int index = 0;
+    
+    for (String talk : this.npcToTalkTo)
+    {
+      talkNames[index] = talk;
+      index++;
+    }
+    
+    return talkNames;
+  }
+  
+  public boolean checkTalkEmpty ()
+  {
+    return this.npcToTalkTo.isEmpty ();
+  }
+  
+  public void addTalk (String name)
+  {
+    this.npcToTalkTo.add (name);
+  }
+  
+  public void removeTalk (String name)
+  {
+    this.npcToTalkTo.remove (name);
+  }
+  
+  public Requirement copy ()
+  {
+    Requirement req = new Requirement ();
+    
+    for (String item : getItemNames ())
+    {
+      req.addItem (item, getItemCount (item));
+    }
+    
+    for (String killName : getKillNames ())
+    {
+      req.addKill (killName, getKillCount (killName));
+    }
+    
+    for (String talk : getTalkNames ())
+    {
+      req.addTalk (talk);
+    }
+    
+    return req;
+  }
+}

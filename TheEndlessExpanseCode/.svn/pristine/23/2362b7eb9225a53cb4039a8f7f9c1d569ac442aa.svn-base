@@ -1,0 +1,93 @@
+package halemaster.ee.world.terrain.tile;
+
+/**
+ * @name TileStyle
+ * 
+ * @version 0.0.0
+ * 
+ * @date Jan 30, 2014
+ */
+public enum TileStyle 
+{
+  OPEN ("open", new boolean[][] {
+    {false, false, false},
+    {false, false, false},
+    {false, false, false}
+  }),
+  BLOCK ("block", new boolean[][] {
+    {true, true, true},
+    {true, true, true},
+    {true, true, true}
+  });
+  
+  public enum Corner
+  {
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT;
+  }
+  
+  public enum Direction
+  {
+    NORTH (1,0),
+    SOUTH (1,2),
+    EAST (2,1),
+    WEST (0,1),
+    NORTH_EAST (2,0),
+    NORTH_WEST (0,0),
+    SOUTH_EAST (2,2),
+    SOUTH_WEST (0,2),
+    ABOVE (1,1);
+    
+    private int x, y;
+    
+    private Direction (int x, int y)
+    {
+      this.x = x;
+      this.y = y;
+    }
+    
+    public int getX ()
+    {
+      return this.x;
+    }
+    
+    public int getY ()
+    {
+      return this.y;
+    }
+  }
+  
+  private String name;
+  private boolean [][] blocks;
+  
+  private TileStyle (String name, boolean[][] blocks)
+  {
+    this.name = name;
+    this.blocks = blocks;
+  }
+  
+  /**
+   * Get the style with the given name;
+   * 
+   * @param name name of style to get
+   * @return style with the given name
+   */
+  public static TileStyle getStyle (String name)
+  {
+    return null;
+  }
+  
+  /**
+   * Whether or not the style blocks 
+   * 
+   * @param corner
+   * @param direction
+   * @return 
+   */
+  public boolean blocks (Corner corner, Direction direction)
+  {
+    return false;
+  }
+}

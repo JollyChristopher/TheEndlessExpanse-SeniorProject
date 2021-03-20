@@ -1,0 +1,110 @@
+package halemaster.ee.world.entity;
+
+import com.jme3.math.Vector2f;
+import halemaster.ee.Overlay;
+import halemaster.ee.Sprite;
+import halemaster.ee.quest.ItemSet;
+import java.util.List;
+import java.util.Random;
+
+/**
+ * @name Action
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 16, 2014
+ */
+public class Action 
+{
+  public static final int ACCURACY_UPPER = 10;
+  public static final int ACCURACY_LOWER = -5;
+  public static final UseAnimation MISS = new UseAnimation (1f, 0, 
+          UseAnimation.ON, "Sounds/effects/miss.wav",
+          Sprite.DEFAULT_BOX, Sprite.DEFAULT_BOX, 
+          new String[] {"Textures/effects/miss/miss.png"});
+  
+  private Entity target;
+  private ItemSet item;
+  
+  public Action (Entity target, ItemSet item)
+  {
+    this.target = target;
+    this.item = item;
+  }
+
+  public Entity getTarget ()
+  {
+    return target;
+  }
+
+  public ItemSet getItem ()
+  {
+    return item;
+  }
+  
+  public boolean act (Entity user)
+  {
+    boolean worked = true;
+    int damageLower, damageUpper, damage;
+    int armor;
+    int acc;
+    int crit;
+    Random random = new Random ();
+    UseAnimation anim = user.getAttackAnimation ();
+    
+    if (null == this.item)
+    {
+      damageLower = user.getDamageLower ();
+      damageUpper = user.getDamageUpper ();
+      armor = this.target.getStat (Statistic.ARMOR);
+      acc = user.getStat (Statistic.ACCURACY);
+      crit = user.getStat (Statistic.CRITICAL);
+      
+      damage = random.nextInt (damageUpper - damageLower + 1) + damageLower;
+      if (crit > random.nextInt (100))
+      {
+        damage *= Entity.CRIT_MODIFIER;
+      }
+      
+      if (acc + random.nextInt (ACCURACY_UPPER - ACCURACY_LOWER + 1) + 
+              ACCURACY_LOWER >= this.target.getStat (Statistic.LEVEL))
+      {
+        damage = Math.max (damage - armor, 1);
+        this.target.damage (damage, user);
+      }
+      else
+      {
+        anim = MISS;
+      }
+      
+      List<String> animList = anim.getAnimations ().get 
+              (random.nextInt (anim.getAnimations ().size ()));
+      String[] animation = new String[animList.size ()];
+      Vector2f location = this.target.getAbsoluteLocation ();
+      Entity dest = null;
+      
+      if (anim.getType ().equals (UseAnimation.TOWARDS))
+      {
+        location = user.getAbsoluteLocation ();
+        dest = this.target;
+      }
+      
+      for (int i = 0; i < animation.length; i++)
+      {
+        animation[i] = animList.get (i);
+      }
+      Overlay animOverlay = new Overlay (user.getName () + "ATTACK" + 
+              this.target.getName (), anim.getFps (), anim.getWidth (), 
+              anim.getHeight (), animation, user.getHolder ().getHolder ()
+              .getPlayerState ().getGame (), anim.getSpeed (), 
+              location, dest, anim.getSound ());
+      animOverlay.start ();
+    }
+    else
+    {
+      // TODO: use the item if possible!
+    }
+    
+    return worked;
+  }
+}

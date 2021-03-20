@@ -1,0 +1,37 @@
+package halemaster.ee.ai;
+
+import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.ViewPort;
+
+/**
+ * @name OfferAI
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ */
+public class OfferAI extends AI
+{
+  private float sinceLast = 0.0f;
+  
+  /**
+   * Called during update of ai
+   * @param tpf time since last frame 
+   */
+  @Override
+  protected void controlUpdate (float tpf)
+  {
+    throw new UnsupportedOperationException ("Not supported yet.");
+  }
+
+  /**
+   * Called for rendering the AI
+   * @param rm render manager used
+   * @param vp view part used
+   */
+  @Override
+  protected void controlRender (RenderManager rm, ViewPort vp)
+  {
+    // does nothing. Overridden for abstract
+  }
+}

@@ -1,0 +1,47 @@
+package halemaster.ee.quest;
+
+/**
+ * @name Reward
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ */
+public class Reward 
+{
+  private ItemSet[] items;
+  private int level;
+  
+  public Reward (int level, ItemSet ... items)
+  {
+    this.items = items;
+    this.level = level;
+  }
+  
+  public int getLevel ()
+  {
+    return this.level;
+  }
+  
+  public ItemSet[] getItems ()
+  {
+    return this.items;
+  }
+  
+  /**
+   * Get a reward suitable for the level given
+   * @param level level of the reward
+   * @return the suitable reward
+   */
+  public static Reward getReward (int level)
+  {
+    Reward reward;
+    ItemSet[] items = null;
+    
+    // determine items here!
+    
+    reward = new Reward (level, items);
+    
+    return reward;
+  }
+}

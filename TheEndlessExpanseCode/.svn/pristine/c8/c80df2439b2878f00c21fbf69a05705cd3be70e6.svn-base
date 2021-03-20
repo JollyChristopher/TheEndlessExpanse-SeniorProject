@@ -1,0 +1,206 @@
+package halemaster.ee.NPC.faction;
+
+import halemaster.ee.Game;
+import halemaster.ee.state.Menu;
+import halemaster.ee.world.faction.DiplomaticGroup;
+import halemaster.ee.world.faction.Faction;
+import halemaster.ee.world.faction.FactionHandler;
+import halemaster.ee.world.faction.Settlement;
+import java.io.File;
+import java.io.IOException;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
+
+@RunWith (JUnit4.class)
+
+/**
+ * @name TestFaction
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 10, 2013
+ */
+public class TestFaction 
+{
+  @Test
+  public void changeDiplomacy ()
+  {
+    Faction faction = new Faction ("test");
+    Faction otherFaction = new Faction ("test2");
+    
+    Assert.assertNull (faction.getDiplomacy (otherFaction));   
+    Assert.assertNull (otherFaction.getDiplomacy (faction));   
+    faction.changeDiplomacy (otherFaction, 0);
+    Assert.assertEquals (DiplomaticGroup.NEUTRAL, 
+            faction.getDiplomacy (otherFaction));
+    Assert.assertEquals (DiplomaticGroup.NEUTRAL, 
+            otherFaction.getDiplomacy (faction));
+    
+    faction.changeDiplomacy (otherFaction, DiplomaticGroup.FRIENDLY.getLow ());
+    Assert.assertEquals (DiplomaticGroup.FRIENDLY, 
+            otherFaction.getDiplomacy (faction));
+    
+    try
+    {
+      faction.changeDiplomacy (null, 0);
+      Assert.fail ("Should throw NullPointerException");
+    }
+    catch (NullPointerException e)
+    {
+      
+    }
+  }
+  
+  @Test
+  public void getDiplomacy ()
+  {
+    Faction faction = new Faction ("test");
+    Faction otherFaction = new Faction ("test2");
+    
+    Assert.assertNull (faction.getDiplomacy (otherFaction));   
+    Assert.assertNull (otherFaction.getDiplomacy (faction));   
+    faction.changeDiplomacy (otherFaction, 0);
+    Assert.assertEquals (DiplomaticGroup.NEUTRAL, 
+            faction.getDiplomacy (otherFaction));
+    Assert.assertEquals (DiplomaticGroup.NEUTRAL, 
+            otherFaction.getDiplomacy (faction));
+    
+    try
+    {
+      faction.getDiplomacy (null);
+      Assert.fail ("Should throw NullPointerException");
+    }
+    catch (NullPointerException e)
+    {
+      
+    }
+  }
+  
+  @Test
+  public void addSettlement ()
+  {
+    Faction faction = new Faction ("test");
+    
+    try
+    {
+      faction.addSettlement (0, 0, 0, null);
+      Assert.fail ("Should throw NullPointerException");
+    }
+    catch (NullPointerException e)
+    {
+      
+    }
+    Assert.assertEquals (0, faction.getSettlements ().length);
+    faction.addSettlement (0, 0, 0, "hello");
+    Assert.assertEquals (1, faction.getSettlements ().length);
+    faction.addSettlement (0, 0, 0, "hello");
+    Assert.assertEquals (1, faction.getSettlements ().length);
+    faction.addSettlement (0, 0, 0, "test");
+    Assert.assertEquals (2, faction.getSettlements ().length);
+  }
+  
+  @Test
+  public void getSettlements ()
+  {
+    Faction faction = new Faction ("test");
+    Settlement[] settlements;
+    
+    for (int i = 0; i < 20; i++)
+    {
+      Assert.assertEquals (i, faction.getSettlements ().length);
+      faction.addSettlement (0, 0, i, "name" + i);
+    }
+  }
+  
+  @Test
+  public void save ()
+  {
+    Faction faction = new Faction ("test");
+    Faction otherFaction = new Faction ("test2");
+    File testFolder = new File (Game.HOME + Game.GAME_FOLDER + Game.WORLD_FOLDER
+            + "/test");
+    
+    faction.addSettlement (0, 0, 0, "testSettlement");
+    faction.changeDiplomacy (otherFaction, 0);
+    
+    try
+    {
+      faction.saveFaction ("test");
+      
+      faction.saveFaction (null);
+      Assert.fail ("Should throw NullPointerException");
+    }
+    catch (NullPointerException e)
+    {
+      
+    }
+    catch (IOException e)
+    {
+      Assert.fail ("Shouldn't throw IOException");
+    }
+    
+    Menu.emptyDirectory (testFolder);
+    testFolder.delete ();
+  }
+  
+  @Test
+  public void load ()
+  {
+    Faction faction = new Faction ("test");
+    Faction otherFaction = new Faction ("test2");
+    FactionHandler handler = new FactionHandler ();
+    File testFolder = new File (Game.HOME + Game.GAME_FOLDER + Game.WORLD_FOLDER
+            + "/test");
+    
+    faction.changeDiplomacy (otherFaction, 0);
+    
+    try
+    {
+      faction.saveFaction ("test");
+      
+      Faction.load ("test", handler);
+    }
+    catch (IOException e)
+    {
+      Assert.fail ("Shouldn't throw IOException");
+    }
+    
+    Assert.assertEquals (faction.getName (), 
+            handler.getFactions ()[0].getName ());
+    Assert.assertEquals (faction.getDiplomacy (otherFaction), 
+            handler.getFaction (faction.getName ())
+            .getDiplomacy (otherFaction));
+    
+    Menu.emptyDirectory (testFolder);
+    testFolder.delete ();
+  }
+  
+  @Test
+  public void staticLoader ()
+  {
+    File testFolder = new File (Game.HOME + Game.GAME_FOLDER + Game.WORLD_FOLDER
+            + "/test");
+    try
+    {
+      Assert.assertNull (Faction.getFaction ("test","test"));
+      Faction.addFaction ("test","test");
+      Assert.assertNotNull (Faction.getFaction ("test","test"));
+      Assert.assertEquals ("test", Faction.getFactions ("test")[0].getName ());
+      Faction.addFaction ("test","test");
+      Assert.assertEquals (1, Faction.getFactions ("test").length);
+      Faction.getFaction ("test","test").saveFaction ("test");
+      Assert.assertEquals (1, Faction.getFactions ("test").length);      
+      Faction.load ("test");
+      Assert.assertEquals (1, Faction.getFactions ("test").length);
+    }
+    catch (IOException e)
+    {
+      Assert.fail ("Shouldn't throw IOException");
+    }
+
+    Menu.emptyDirectory (testFolder);
+    testFolder.delete ();
+  }
+}

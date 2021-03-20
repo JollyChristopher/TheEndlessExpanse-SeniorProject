@@ -1,0 +1,8 @@
+{"id":-127,"name":"Tundra","color":"0066cc00","habituality":5,"temperature":[-128,0],"precipitation":[-128,127],"elevation":[0,80]}
+{"id":-126,"name":"Ice Cap","color":"99ccff00","habituality":1,"temperature":[-128,-80],"precipitation":[-128,127],"elevation":[-128,0]}
+{"id":-125,"name":"Desert","color":"ffff0000","habituality":10,"temperature":[0,127],"precipitation":[-128,-70],"elevation":[0,80]}
+{"id":-124,"name":"Plains","color":"80ff0000","habituality":50,"temperature":[0,127],"precipitation":[-70,-10],"elevation":[0,80]}
+{"id":-123,"name":"Forest","color":"66cc0000","habituality":40,"temperature":[0,127],"precipitation":[-10,50],"elevation":[0,80]}
+{"id":-122,"name":"Rain Forest","color":"4c990000","habituality":10,"temperature":[0,127],"precipitation":[50,127],"elevation":[0,80]}
+{"id":-121,"name":"Mountains","color":"a0a0a000","habituality":30,"temperature":[-10,127],"precipitation":[-128,127],"elevation":[80,127]}
+{"id":-120,"name":"Snowy Mountains","color":"ffffffff","habituality":10,"temperature":[-128,-10],"precipitation":[-128,127],"elevation":[80,127]}

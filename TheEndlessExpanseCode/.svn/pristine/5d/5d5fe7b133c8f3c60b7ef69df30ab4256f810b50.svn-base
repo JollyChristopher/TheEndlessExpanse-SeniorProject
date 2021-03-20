@@ -1,0 +1,32 @@
+package halemaster.ee.item;
+
+import java.util.Map;
+
+/**
+ * @name StatModifier
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 23, 2014
+ */
+public class StatModifier 
+{
+  private int damageLower;
+  private int damageUpper;
+  private Map<String, Integer> boost;
+
+  public int getDamageLower ()
+  {
+    return damageLower;
+  }
+
+  public int getDamageUpper ()
+  {
+    return damageUpper;
+  }
+
+  public Map<String, Integer> getBoost ()
+  {
+    return boost;
+  }
+}

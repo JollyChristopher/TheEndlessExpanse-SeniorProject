@@ -1,0 +1,143 @@
+annotation.processing.enabled=true
+annotation.processing.enabled.in.editor=false
+annotation.processing.processors.list=
+annotation.processing.run.all.processors=true
+ant.customtasks.libs=launch4j
+application.desc=The Endless Expanse is a 3D RPG with a randomly generating world, whose history is essential to gameplay.
+application.title=The Endless Expanse
+application.vendor=Halemaster Games
+assets.jar.name=assets.jar
+assets.excludes=**/*.j3odata,**/*.mesh.xml,**/*.skeleton.xml,**/*.scene,**/*.material,**/*.obj,**/*.mtl,**/*.blend
+assets.folder.name=assets
+assets.compress=true
+auxiliary.org-netbeans-modules-editor-indent.CodeStyle.project.expand-tabs=true
+auxiliary.org-netbeans-modules-editor-indent.CodeStyle.project.indent-shift-width=2
+auxiliary.org-netbeans-modules-editor-indent.CodeStyle.project.spaces-per-tab=2
+auxiliary.org-netbeans-modules-editor-indent.CodeStyle.project.tab-size=4
+auxiliary.org-netbeans-modules-editor-indent.CodeStyle.project.text-limit-width=80
+auxiliary.org-netbeans-modules-editor-indent.CodeStyle.project.text-line-wrap=none
+auxiliary.org-netbeans-modules-editor-indent.CodeStyle.usedProfile=project
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.blankLinesAfterClassHeader=0
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.classDeclBracePlacement=NEW_LINE
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.methodDeclBracePlacement=NEW_LINE
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.otherBracePlacement=NEW_LINE
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.placeCatchOnNewLine=true
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.placeElseOnNewLine=true
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.placeFinallyOnNewLine=true
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.spaceBeforeAnnotationParen=true
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.spaceBeforeMethodCallParen=true
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.spaceBeforeMethodDeclParen=true
+auxiliary.org-netbeans-modules-editor-indent.text.x-java.CodeStyle.project.specialElseIf=false
+build.classes.dir=${build.dir}/classes
+build.classes.excludes=**/*.java,**/*.form
+# This directory is removed when the project is cleaned:
+build.dir=build
+build.generated.dir=${build.dir}/generated
+build.generated.sources.dir=${build.dir}/generated-sources
+# Only compile against the classpath explicitly listed here:
+build.sysclasspath=ignore
+build.test.classes.dir=${build.dir}/test/classes
+build.test.results.dir=${build.dir}/test/results
+compile.on.save=true
+# Uncomment to specify the preferred debugger connection transport:
+#debug.transport=dt_socket
+debug.classpath=\
+    ${run.classpath}
+debug.test.classpath=\
+    ${run.test.classpath}
+# This directory is removed when the project is cleaned:
+dist.dir=dist
+dist.jar=${dist.dir}/${application.title}.jar
+dist.javadoc.dir=${dist.dir}/javadoc
+endorsed.classpath=
+excludes=
+file.reference.dom4j-1.6.1.jar=dom4j-1.6.1.jar
+file.reference.gson-2.2.4-javadoc.jar=google-gson-2.2.4/gson-2.2.4-javadoc.jar
+file.reference.gson-2.2.4.jar=google-gson-2.2.4/gson-2.2.4.jar
+file.reference.guava-11.0.2.jar=guava-11.0.2.jar
+file.reference.hamcrest-core-1.3.jar=/home/christopher/jmonkeyplatform/jdk/lib/hamcrest-core-1.3.jar
+file.reference.javassist-3.16.1-GA.jar=javassist-3.16.1-GA.jar
+file.reference.jsr305-1.3.9.jar=jsr305-1.3.9.jar
+file.reference.junit-4.11.jar=/home/christopher/jmonkeyplatform/jdk/lib/junit-4.11.jar
+file.reference.reflections-0.9.9-RC1-uberjar.jar=reflections-0.9.9-RC1-uberjar.jar
+file.reference.slf4j-api-1.6.1.jar=slf4j-api-1.6.1.jar
+file.reference.slf4j-simple-1.6.1.jar=slf4j-simple-1.6.1.jar
+file.reference.xml-apis-1.0.b2.jar=xml-apis-1.0.b2.jar
+includes=**
+jar.archive.disabled=${jnlp.enabled}
+jar.compress=false
+jar.index=${jnlp.enabled}
+javac.classpath=\
+    ${libs.jme3.classpath}:\
+    ${libs.jme3-libraries.classpath}:\
+    ${file.reference.gson-2.2.4.jar}:\
+    ${file.reference.gson-2.2.4-javadoc.jar}:\
+    ${file.reference.reflections-0.9.9-RC1-uberjar.jar}:\
+    ${file.reference.dom4j-1.6.1.jar}:\
+    ${file.reference.guava-11.0.2.jar}:\
+    ${file.reference.javassist-3.16.1-GA.jar}:\
+    ${file.reference.jsr305-1.3.9.jar}:\
+    ${file.reference.slf4j-api-1.6.1.jar}:\
+    ${file.reference.slf4j-simple-1.6.1.jar}:\
+    ${file.reference.xml-apis-1.0.b2.jar}:\
+    ${libs.jme3-libraries-ai.classpath}
+# Space-separated list of extra javac options
+javac.compilerargs=
+javac.deprecation=false
+javac.processorpath=\
+    ${javac.classpath}
+javac.source=1.5
+javac.target=1.5
+javac.test.classpath=\
+    ${javac.classpath}:\
+    ${build.classes.dir}:\
+    ${file.reference.hamcrest-core-1.3.jar}:\
+    ${file.reference.junit-4.11.jar}
+javadoc.additionalparam=
+javadoc.author=false
+javadoc.encoding=${source.encoding}
+javadoc.noindex=false
+javadoc.nonavbar=false
+javadoc.notree=false
+javadoc.private=false
+javadoc.splitindex=true
+javadoc.use=true
+javadoc.version=false
+javadoc.windowtitle=The Endless Expanse
+jaxbwiz.endorsed.dirs="${netbeans.home}/../ide12/modules/ext/jaxb/api"
+jnlp.codebase.type=local
+jnlp.descriptor=application
+jnlp.enabled=false
+jnlp.mixed.code=default
+jnlp.offline-allowed=false
+jnlp.signed=false
+jnlp.signing=
+jnlp.signing.alias=
+jnlp.signing.keystore=
+launch4j.exe.enabled=true
+linux.launcher.enabled=true
+lwjgl.applet.height=480
+lwjgl.applet.width=640
+mac.app.enabled=true
+main.class=halemaster.ee.Game
+meta.inf.dir=${src.dir}/META-INF
+manifest.file=MANIFEST.MF
+mkdist.disabled=false
+mobile.android.package=com.halemaster.ee
+mobile.android.target=android-11
+obfuscate.options=-keep public class * extends com.jme3.app.Application{public *;}\n-keep public class * extends com.jme3.system.JmeSystemDelegate{public *;}\n-keep public class * implements com.jme3.renderer.Renderer{public *;}\n-keep public class * implements com.jme3.asset.AssetLoader{public *;}\n-keep public class * implements com.jme3.asset.AssetLocator{public *;}\n-keep public class * implements de.lessvoid.nifty.screen.ScreenController{public *;}\n-dontwarn\n-dontnote\n
+platform.active=default_platform
+run.classpath=\
+    ${javac.classpath}:\
+    ${build.classes.dir}:\
+    ${assets.folder.name}
+# Space-separated list of JVM arguments used when running the project
+# (you may also define separate properties like run-sys-prop.name=value instead of -Dname=value
+# or test-sys-prop.name=value to set system properties for unit tests):
+run.jvmargs=-Xmx1G
+run.test.classpath=\
+    ${javac.test.classpath}:\
+    ${build.test.classes.dir}
+source.encoding=UTF-8
+src.dir=src
+test.test.dir=test

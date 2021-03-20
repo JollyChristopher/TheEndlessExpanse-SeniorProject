@@ -1,0 +1,1143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nifty xmlns="http://nifty-gui.sourceforge.net/nifty-1.3.xsd" 
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xsi:schemaLocation="http://nifty-gui.sourceforge.net/nifty-1.3.xsd 
+http://nifty-gui.sourceforge.net/nifty-1.3.xsd">
+   <useStyles filename="Interface/TEEStyle.xml" />
+   <useControls filename="nifty-default-controls.xml" />
+
+   <style id="my-scrollpanel#scrollpanel">
+    <attributes backgroundColor="#0000"></attributes>
+    <effect overlay="true">
+      <onActive name="imageOverlay" filename="blackborder.png" 
+                imageMode="resize:1,30,1,1,1,30,1,1,1,30,1,1" post="true">
+      </onActive>
+    </effect>
+    </style>
+    <style id="my-scrollpanel#bottom-right">
+      <attributes width="23px" height="23px"></attributes>
+    </style>
+    <controlDefinition name="healthbar" controller="halemaster.ee.state.HealthBarControl">
+      <panel childLayout="horizontal" width="100%" height="100%">
+        <image id="heart_1" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_2" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_3" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_4" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_5" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_6" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_7" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_8" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_9" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+        <image id="heart_10" filename="Interface/Images/heart_full.png" width="10%" height="100%"/>
+      </panel>
+    </controlDefinition>
+  <!-- +++++++++++++++++++++++++++++++++++++++ -->
+  <!-- hud screen -->
+  <!-- +++++++++++++++++++++++++++++++++++++++ -->
+  <screen id="hud" controller="halemaster.ee.state.Hud">
+    <layer id="main-layer" childLayout="vertical" height="100%" width="100%">
+      <panel id="top-panel" height="15%" width="100%"
+             childLayout="horizontal" visibleToMouse="false">
+        <panel id="player" width="25%" height="95%" childLayout="vertical" 
+               visibleToMouse="true">
+          <image filename="Interface/Images/target_rim.png"
+                 width="100%" height="100%" childLayout="horizontal"
+                 imageMode="resize:6,4,6,6,6,4,6,4,6,4,6,6">
+            <panel id="player_stats" childLayout="horizontal" height="95%">
+              <panel childLayout="vertical" width="30%" height="95%">
+                <image id="player_image" filename="Interface/Images/character.png"
+                       align="center" width="100%" height="100%"/>
+              </panel>
+              <panel childLayout="vertical" height="95%"
+                     width="70%">
+                <control name="label" id="player_name" text="NAME OF PLAYER"
+                         width="100%" height="50%"/>
+                <control name="healthbar" id="player_health" 
+                         height="25%" width="100%" percentage="0.85"/>
+                <panel id="player_effects" childLayout="horizontal" height="25%"
+                       width="100%">
+                  <image id="player_effect_0" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="player_effect_0_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="player_effect_1" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="player_effect_1_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="player_effect_2" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="player_effect_2_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="player_effect_3" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="player_effect_3_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="player_effect_4" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="player_effect_4_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="player_effect_5" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="player_effect_5_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="player_effect_6" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="player_effect_6_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="player_effect_7" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="player_effect_7_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="player_effect_8" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="player_effect_8_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="player_effect_cont" filename="Interface/Images/effect_cont.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <effect>
+                      <onHover name="hint" hintText="effect_continue"/>
+                    </effect>
+                  </image>
+                </panel>
+              </panel>
+            </panel>
+          </image>
+        </panel>
+        <panel width="2%"/>
+        <panel id="target" width="25%" height="95%" childLayout="vertical" 
+               visibleToMouse="true">
+          <image filename="Interface/Images/target_rim.png"
+                 width="100%" height="100%" childLayout="horizontal"
+                 imageMode="resize:6,4,6,6,6,4,6,4,6,4,6,6">
+            <panel id="target_stats" childLayout="horizontal" height="95%">
+              <panel childLayout="vertical" width="30%" height="95%">
+                <image id="target_image" filename="Interface/Images/character.png"
+                       align="center" width="100%" height="100%"/>
+              </panel>
+              <panel childLayout="vertical" height="95%"
+                     width="70%">
+                <control name="label" id="target_name" text="NAME OF PLAYER"
+                         width="100%" height="50%"/>
+                <control name="healthbar" id="target_health" 
+                         height="25%" width="100%" percentage="0.85"/>
+                <panel id="target_effects" childLayout="horizontal" height="25%"
+                       width="100%">
+                  <image id="target_effect_0" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="target_effect_0_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="target_effect_1" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="target_effect_1_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="target_effect_2" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="target_effect_2_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="target_effect_3" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="target_effect_3_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="target_effect_4" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="target_effect_4_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="target_effect_5" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="target_effect_5_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="target_effect_6" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="target_effect_6_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="target_effect_7" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="target_effect_7_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="target_effect_8" filename="Interface/Images/character.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <control name="label" id="target_effect_8_text" text="999"/>
+                    <effect>
+                      <onHover name="hint" hintText="effect"/>
+                    </effect>
+                  </image>
+                  <image id="target_effect_cont" filename="Interface/Images/effect_cont.png"
+                         width="10%" height="100%" childLayout="horizontal">
+                    <effect>
+                      <onHover name="hint" hintText="effect_continue"/>
+                    </effect>
+                  </image>
+                </panel>
+              </panel>
+            </panel>
+          </image>
+        </panel>
+        <panel width="28%"/>
+        <panel id="buttons" childLayout="horizontal" height="100%" width="20%"
+                valign="center">
+          <image id="InvBtn" filename="Interface/Images/inventory.png" width="24%" 
+               height="90%" childLayout="horizontal" align="center" valign="center">
+            <interact onClick="openInventory()"/>
+          </image>
+          <panel width="1%"/>
+          <image id="CharBtn" filename="Interface/Images/character.png" width="24%" 
+                 height="90%" childLayout="horizontal" align="center" valign="center">
+              <interact onClick="openCharacter()"/>
+          </image>
+          <panel width="1%"/>
+          <image id="QuestBtn" filename="Interface/Images/quests.png" width="24%" 
+                 height="90%" childLayout="horizontal" align="center" valign="center">
+              <interact onClick="openQuestLog()"/>
+          </image>
+          <panel width="1%"/>
+          <image id="MapBtn" filename="Interface/Images/options.png" width="24%" 
+                 height="90%" childLayout="horizontal" align="center" valign="center">
+              <interact onClick="openMap()"/>
+          </image>
+        </panel>
+      </panel>
+      <panel height="85%" childLayout="horizontal">
+        <panel height="100%" width="40%" childLayout="vertical">
+          <panel height="70%"/>
+          <panel height="30%" childLayout="horizontal">
+            <control id="chatArea" name="nifty-chat" width="100%" height="100%" 
+                     lines="3" sendLabel="${CALL.localize(game.hud.speak)}" />
+          </panel>
+        </panel>
+        <panel height="100%" width="60%" childLayout="vertical">
+          <panel height="85%"/>
+          <panel height="15%" childLayout="horizontal">
+            <panel width="1%"/>
+            <control id="skill-1" name="droppable" width="9%" height="90%">
+              <image id="skill-1-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-1-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(1)" />
+                  <text text='1' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+            <panel width="1%"/>
+            <control id="skill-2" name="droppable" width="9%" height="90%">
+              <image id="skill-2-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-2-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(2)" />
+                  <text text='2' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+            <panel width="1%"/>
+            <control id="skill-3" name="droppable" width="9%" height="90%">
+              <image id="skill-3-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-3-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(3)" />
+                  <text text='3' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+            <panel width="1%"/>
+            <control id="skill-4" name="droppable" width="9%" height="90%">
+              <image id="skill-4-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-4-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(4)" />
+                  <text text='4' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+            <panel width="1%"/>
+            <control id="skill-5" name="droppable" width="9%" height="90%">
+              <image id="skill-5-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-5-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(5)" />
+                  <text text='5' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+            <panel width="1%"/>
+            <control id="skill-6" name="droppable" width="9%" height="90%">
+              <image id="skill-6-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-6-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(6)" />
+                  <text text='6' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+            <panel width="1%"/>
+            <control id="skill-7" name="droppable" width="9%" height="90%">
+              <image id="skill-7-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-7-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(7)" />
+                  <text text='7' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+            <panel width="1%"/>
+            <control id="skill-8" name="droppable" width="9%" height="90%">
+              <image id="skill-8-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-8-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(8)" />
+                  <text text='8' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+            <panel width="1%"/>
+            <control id="skill-9" name="droppable" width="9%" height="90%">
+              <image id="skill-9-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-9-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(9)" />
+                  <text text='9' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+            <panel width="1%"/>
+            <control id="skill-0" name="droppable" width="9%" height="90%">
+              <image id="skill-0-back" filename="Interface/Images/skill_back.png" width="100%" height="100%"
+                childLayout="horizontal" align="center" valign="center">
+                <panel width="10%" />
+                <image id="skill-0-image" filename="Interface/Images/skill_blank.png" width="80%" height="80%"
+                  align="center" valign="center" childLayout="horizontal">
+                  <interact onClick="skill(0)" />
+                  <text text='0' textHAlign="right" align="right" valign="bottom"
+                    font="Interface/Fonts/Default.fnt" width="100%"/>
+                </image>
+              </image>
+              <effect>
+                <onHover name="hint" hintText="   "/>
+              </effect>
+            </control>
+          </panel>
+        </panel>
+      </panel>
+    </layer>
+    <layer id="windows" childLayout="absolute">
+      <control id="window_character" name="window" title="CHARACTER_NAME" 
+               width="300px" height="312px" y="15%" 
+               x="${CALL.getWidthPercent(99,300)}px" childLayout="vertical"
+               visibleToMouse="true" hideOnClose="true">
+        <panel height="100%" childLayout="vertical">
+          <panel height="40%" childLayout="horizontal">
+            <image id="window_character_player_image" 
+                   filename="Interface/Images/character.png"
+                   width="40%" height="100%"/>
+            <panel width="60%" height="100%" childLayout="vertical">
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <control id="char_name" name="label" align="left"/>
+              </panel>
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <text text='${CALL.localize(game.level)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_level" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.level.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <text text='${CALL.localize(game.xp)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_xp" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.xp.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <text text='${CALL.localize(game.points)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_points" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.points.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="20%" childLayout="horizontal">
+                <text text='${CALL.localize(game.health)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_health" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.health.explain)}"/>
+                </effect>
+              </panel>
+            </panel>
+          </panel>
+          <panel height="50%" childLayout="horizontal">
+            <panel width="50%" height="100%" childLayout="vertical">
+              <panel width="100%" height="33.3%" childLayout="horizontal">
+                <image id="equip_ACCESSORY_back" filename="Interface/Images/skill_back.png"
+                       width="33.3%" height="100%" align="center" valign="center" 
+                       childLayout="horizontal">
+                  <control id="equip_ACCESSORY" name="droppable" width="100%" height="100%">
+                    <control id="equip_ACCESSORY_drag" name="draggable" width="32px" height="32px"
+                             childLayout="center">
+                      <image id="equip_ACCESSORY_image" filename="Interface/Images/skill_blank.png"
+                             width="100%" height="100%" childLayout="horizontal">
+                      </image>
+                    </control>
+                  </control>
+                  <effect>
+                    <onHover name="hint" hintText="ACC_TEXT"/>
+                  </effect>
+                </image>
+                <image id="equip_HELM_back" filename="Interface/Images/skill_back.png"
+                       width="33.3%" height="100%" align="center" valign="center" 
+                       childLayout="horizontal">
+                  <control id="equip_HELM" name="droppable" width="100%" height="100%">
+                    <control id="equip_HELM_drag" name="draggable" width="32px" height="32px"
+                             childLayout="center">
+                      <image id="equip_HELM_image" filename="Interface/Images/skill_blank.png"
+                             width="100%" height="100%" childLayout="horizontal">
+                      </image>
+                    </control>
+                  </control>
+                  <effect>
+                    <onHover name="hint" hintText="HELM_TEXT"/>
+                  </effect>
+                </image>
+                <image id="equip_GLOVES_back" filename="Interface/Images/skill_back.png"
+                       width="33.3%" height="100%" align="center" valign="center" 
+                       childLayout="horizontal">
+                  <control id="equip_GLOVES" name="droppable" width="100%" height="100%">
+                    <control id="equip_GLOVES_drag" name="draggable" width="32px" height="32px"
+                             childLayout="center">
+                      <image id="equip_GLOVES_image" filename="Interface/Images/skill_blank.png"
+                             width="100%" height="100%" childLayout="horizontal">
+                      </image>
+                    </control>
+                  </control>
+                  <effect>
+                    <onHover name="hint" hintText="GLOVE_TEXT"/>
+                  </effect>
+                </image>
+              </panel>
+              <panel width="100%" height="33.3%" childLayout="horizontal">
+                <image id="equip_MAIN_HAND_back" filename="Interface/Images/skill_back.png"
+                       width="33.3%" height="100%" align="center" valign="center" 
+                       childLayout="horizontal">
+                  <control id="equip_MAIN_HAND" name="droppable" width="100%" height="100%">
+                    <control id="equip_MAIN_HAND_drag" name="draggable" width="32px" height="32px"
+                             childLayout="center">
+                      <image id="equip_MAIN_HAND_image" filename="Interface/Images/skill_blank.png"
+                             width="100%" height="100%" childLayout="horizontal">
+                      </image>
+                    </control>
+                  </control>
+                  <effect>
+                    <onHover name="hint" hintText="MAIN_TEXT"/>
+                  </effect>
+                </image>
+                <image id="equip_BODY_back" filename="Interface/Images/skill_back.png"
+                       width="33.3%" height="100%" align="center" valign="center" 
+                       childLayout="horizontal">
+                  <control id="equip_BODY" name="droppable" width="100%" height="100%">
+                    <control id="equip_BODY_drag" name="draggable" width="32px" height="32px"
+                             childLayout="center">
+                      <image id="equip_BODY_image" filename="Interface/Images/skill_blank.png"
+                             width="100%" height="100%" childLayout="horizontal">
+                      </image>
+                    </control>
+                  </control>
+                  <effect>
+                    <onHover name="hint" hintText="BODY_TEXT"/>
+                  </effect>
+                </image>
+                <image id="equip_OFF_HAND_back" filename="Interface/Images/skill_back.png"
+                       width="33.3%" height="100%" align="center" valign="center" 
+                       childLayout="horizontal">
+                  <control id="equip_OFF_HAND" name="droppable" width="100%" height="100%">
+                    <control id="equip_OFF_HAND_drag" name="draggable" width="32px" height="32px"
+                             childLayout="center">
+                      <image id="equip_OFF_HAND_image" filename="Interface/Images/skill_blank.png"
+                             width="100%" height="100%" childLayout="horizontal">
+                      </image>
+                    </control>
+                  </control>
+                  <effect>
+                    <onHover name="hint" hintText="OFF_TEXT"/>
+                  </effect>
+                </image>
+              </panel>
+              <panel width="100%" height="33.3%" childLayout="horizontal">
+                <image id="equip_BELT_back" filename="Interface/Images/skill_back.png"
+                       width="33.3%" height="100%" align="center" valign="center" 
+                       childLayout="horizontal">
+                  <control id="equip_BELT" name="droppable" width="100%" height="100%">
+                    <control id="equip_BELT_drag" name="draggable" width="32px" height="32px"
+                             childLayout="center">
+                      <image id="equip_BELT_image" filename="Interface/Images/skill_blank.png"
+                             width="100%" height="100%" childLayout="horizontal">
+                      </image>
+                    </control>
+                  </control>
+                  <effect>
+                    <onHover name="hint" hintText="BELT_TEXT"/>
+                  </effect>
+                </image>
+                <image id="equip_LEGS_back" filename="Interface/Images/skill_back.png"
+                       width="33.3%" height="100%" align="center" valign="center" 
+                       childLayout="horizontal">
+                  <control id="equip_LEGS" name="droppable" width="100%" height="100%">
+                    <control id="equip_LEGS_drag" name="draggable" width="32px" height="32px"
+                             childLayout="center">
+                      <image id="equip_LEGS_image" filename="Interface/Images/skill_blank.png"
+                             width="100%" height="100%" childLayout="horizontal">
+                      </image>
+                    </control>
+                  </control>
+                  <effect>
+                    <onHover name="hint" hintText="LEGS_TEXT"/>
+                  </effect>
+                </image>
+                <image id="equip_BOOTS_back" filename="Interface/Images/skill_back.png"
+                       width="33.3%" height="100%" align="center" valign="center" 
+                       childLayout="horizontal">
+                  <control id="equip_BOOTS" name="droppable" width="100%" height="100%">
+                    <control id="equip_BOOTS_drag" name="draggable" width="32px" height="32px"
+                             childLayout="center">
+                      <image id="equip_BOOTS_image" filename="Interface/Images/skill_blank.png"
+                             width="100%" height="100%" childLayout="horizontal">
+                      </image>
+                    </control>
+                  </control>
+                  <effect>
+                    <onHover name="hint" hintText="BOOTS_TEXT"/>
+                  </effect>
+                </image>
+              </panel>
+            </panel>
+            <panel width="50%" height="100%" childLayout="vertical">
+              <panel width="100%" height="12.5%" childLayout="horizontal"
+                visibleToMouse="true">
+                <interact onClick="addPower()"/>
+                <text text='${CALL.localize(game.power)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_power" name="label" align="left"/>
+                  <effect>
+                    <onHover name="hint" hintText="${CALL.localize(game.power.explain)}"/>
+                  </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal"
+                visibleToMouse="true">
+                <interact onClick="addAgility()"/>
+                <text text='${CALL.localize(game.agility)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_agility" name="label" align="left"/>
+                  <effect>
+                    <onHover name="hint" hintText="${CALL.localize(game.agility.explain)}"/>
+                  </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal"
+                visibleToMouse="true">
+                <interact onClick="addIntellect()"/>
+                <text text='${CALL.localize(game.intellect)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_intellect" name="label" align="left"/>
+                  <effect>
+                    <onHover name="hint" hintText="${CALL.localize(game.intellect.explain)}"/>
+                  </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal">
+                <text text='${CALL.localize(game.damage)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_damage" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.damage.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal">
+                <text text='${CALL.localize(game.armor)}' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_armor" name="label" align="left" width="*"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.armor.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal">
+                <text text='${CALL.localize(game.accuracy)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_accuracy" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.accuracy.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal">
+                <text text='${CALL.localize(game.craft)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_craft" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.craft.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal" childAlign="left">
+                <text text='${CALL.localize(game.critical)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_critical" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.critical.explain)}"/>
+                </effect>
+              </panel>
+              <panel width="100%" height="12.5%" childLayout="horizontal" childAlign="left">
+                <text text='${CALL.localize(game.haste)} ' align="left"
+                      font="Interface/Fonts/Default.fnt"/>
+                <control id="char_haste" name="label" align="left"/>
+                <effect>
+                  <onHover name="hint" hintText="${CALL.localize(game.haste.explain)}"/>
+                </effect>
+              </panel>
+            </panel>
+          </panel>
+        </panel>
+      </control>
+      <control id="window_quest" name="window" title="Quest Log" 
+               width="300px" height="312px" x="1%" y="15%" 
+               childLayout="vertical" visibleToMouse="true" hideOnClose="true">
+        <panel height="100%" childLayout="vertical">
+          <control id="questLog" name="listBox" displayItems="2" 
+                   selectionMode="Single" forceSelection="true" vertical="on"
+                   horizontal="off" width="100%" height="20%"/>
+          <panel id="secondHalf" width="100%" height="80%" childLayout="vertical">
+            <control id="questScroll" name="scrollPanel" horizontal="false"
+                      width="100%" height="100%" style="my-scrollpanel"
+                      pageSizeY="200.0" stepSizeY="50.0">
+              <panel id="questScroll" width="100%" valign="top" childLayout="vertical">
+                <control id="currentQuestTitle" name="label" width="96%" 
+                         wrap="true" align="center" text=""/>
+                <control id="currentQuestDescription" name="label" width="96%" 
+                         wrap="true" align="left" text=""/>
+                <control id="questRequirements" name="label" width="96%" 
+                         wrap="true" align="left" text=""/>
+                <panel id="questReward" width="96%"childLayout="vertical">
+                </panel>
+              </panel>
+            </control>
+          </panel>
+        </panel>
+      </control>
+      <control id="window_map" name="window" title="Map" 
+               width="${CALL.getMapWidth(32)}px" height="${CALL.getMapHeight(32)}px"
+               x="30%" y="5%" 
+               childLayout="vertical" visibleToMouse="true" hideOnClose="true">
+        <panel height="${CALL.getMapHeight(0)}px" width="${CALL.getMapWidth(0)}px"
+               childLayout="vertical">
+          <image id="map_image" filename="Interface/Images/character.png"
+                 width="100%" height="100%" childLayout="absolute">
+          </image>
+        </panel>
+      </control>
+      <control id="window_inventory" name="window" title="Inventory" 
+               width="200px" height="212px" 
+               y="${CALL.getHeightPercent(85.6,212)}px" 
+               x="${CALL.getWidthPercent(99,200)}px"
+               childLayout="vertical" visibleToMouse="true" hideOnClose="true">
+        <panel height="100%" childLayout="vertical">
+          <panel height="20%" childLayout="horizontal">
+            <image id="inv_0,0_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_0,0" name="droppable" width="100%" height="100%">
+                <control id="inv_0,0_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_0,0_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_0,0_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_0,1_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_0,1" name="droppable" width="100%" height="100%">
+                <control id="inv_0,1_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_0,1_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_0,1_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_0,2_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_0,2" name="droppable" width="100%" height="100%">
+                <control id="inv_0,2_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_0,2_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_0,2_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_0,3_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_0,3" name="droppable" width="100%" height="100%">
+                <control id="inv_0,3_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_0,3_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_0,3_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_0,4_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_0,4" name="droppable" width="100%" height="100%">
+                <control id="inv_0,4_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_0,4_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_0,4_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+          </panel>
+          <panel height="20%" childLayout="horizontal">
+            <image id="inv_1,0_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_1,0" name="droppable" width="100%" height="100%">
+                <control id="inv_1,0_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_1,0_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_1,0_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_1,1_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_1,1" name="droppable" width="100%" height="100%">
+                <control id="inv_1,1_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_1,1_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_1,1_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_1,2_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_1,2" name="droppable" width="100%" height="100%">
+                <control id="inv_1,2_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_1,2_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_1,2_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_1,3_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_1,3" name="droppable" width="100%" height="100%">
+                <control id="inv_1,3_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_1,3_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_1,3_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_1,4_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_1,4" name="droppable" width="100%" height="100%">
+                <control id="inv_1,4_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_1,4_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_1,4_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+          </panel>
+          <panel height="20%" childLayout="horizontal">
+            <image id="inv_2,0_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_2,0" name="droppable" width="100%" height="100%">
+                <control id="inv_2,0_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_2,0_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_2,0_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_2,1_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_2,1" name="droppable" width="100%" height="100%">
+                <control id="inv_2,1_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_2,1_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_2,1_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_2,2_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_2,2" name="droppable" width="100%" height="100%">
+                <control id="inv_2,2_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_2,2_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_2,2_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_2,3_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_2,3" name="droppable" width="100%" height="100%">
+                <control id="inv_2,3_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_2,3_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_2,3_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_2,4_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_2,4" name="droppable" width="100%" height="100%">
+                <control id="inv_2,4_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_2,4_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_2,4_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+          </panel>
+          <panel height="20%" childLayout="horizontal">
+            <image id="inv_3,0_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_3,0" name="droppable" width="100%" height="100%">
+                <control id="inv_3,0_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_3,0_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_3,0_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_3,1_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_3,1" name="droppable" width="100%" height="100%">
+                <control id="inv_3,1_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_3,1_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_3,1_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_3,2_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_3,2" name="droppable" width="100%" height="100%">
+                <control id="inv_3,2_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_3,2_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_3,2_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_3,3_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_3,3" name="droppable" width="100%" height="100%">
+                <control id="inv_3,3_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_3,3_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_3,3_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+            <image id="inv_3,4_back" filename="Interface/Images/skill_back.png" width="20%" height="100%"
+                align="center" valign="center" childLayout="horizontal">
+              <control id="inv_3,4" name="droppable" width="100%" height="100%">
+                <control id="inv_3,4_drag" name="draggable" width="32px" height="32px"
+                         childLayout="center">
+                  <image id="inv_3,4_image" filename="Interface/Images/skill_blank.png"
+                         width="100%" height="100%" childLayout="horizontal">
+                    <text id="inv_3,4_count" text="" textHAlign="right" 
+                          align="right" valign="bottom"
+                          font="Interface/Fonts/Default.fnt" width="100%"/>
+                  </image>
+                </control>
+              </control>
+              <effect>
+                <onHover name="hint" hintText="INV_TEXT"/>
+              </effect>
+            </image>
+          </panel>
+          <panel height="20%" childLayout="horizontal">
+            <control name="label" id="coin_copper" text='0' align="right" 
+                     valign="center" font="Interface/Fonts/Default.fnt" 
+                     width="60%"/>
+            <image id="copper" filename="Interface/Images/copper.png" 
+                   width="20%" height="100%" align="center" valign="center">
+            </image>
+            <control id="item_delete" name="droppable" width="20%" height="90%">
+              <image id="item_delete_back" filename="Interface/Images/delete.png"
+                     width="100%" height="100%"/>
+            </control>
+          </panel>
+        </panel>
+      </control>
+    </layer>
+  </screen>
+  <popup id="movementPopup" childLayout="center" backgroundColor="#000a">
+    <effect>
+      <onStartScreen name="fade" start="#0" end="#a" length="200" inherit="true"/>
+      <onEndScreen name="fade" start="#a" end="#0" length="200" startDelay="100" inherit="true"/>
+    </effect>
+    <panel childLayout="center" width="95%" align="center" valign="center">
+      <panel childLayout="vertical" width="30%" height="20%">
+        <control name="label" id="travel_text" text='place' align="center" 
+                     valign="center" font="Interface/Fonts/Default.fnt" 
+                     width="90%" height="40%" wrap="true"/>
+        <panel childLayout="horizontal" width="90%" height="60%">
+          <control name="button" label="${CALL.localize(game.hud.travel)}" 
+                   width="50%" height="100%">
+            <interact onClick="travel()"/>
+          </control>
+          <control name="button" label="${CALL.localize(game.hud.cancel)}" 
+                   width="50%" height="100%">
+            <interact onClick="closeGoto()"/>
+          </control>
+        </panel>
+      </panel>
+    </panel>
+  </popup>
+  <popup id="consolePopup" childLayout="center" backgroundColor="#000a">
+    <effect>
+      <onStartScreen name="fade" start="#0" end="#a" length="200" inherit="true"/>
+      <onEndScreen name="fade" start="#a" end="#0" length="200" startDelay="100" inherit="true"/>
+    </effect>
+    <panel childLayout="center" width="95%" align="center" valign="center">
+      <control id="console" name="nifty-console" lines="25" align="center" valign="center">
+        <effect>
+          <onStartScreen name="move" direction="top" mode="in" length="200" startDelay="100" inherit="true"/>
+          <onEndScreen name="move" direction="top" mode="out" length="200" startDelay="0" inherit="true"/>
+        </effect>
+      </control>
+    </panel>
+  </popup>
+</nifty>

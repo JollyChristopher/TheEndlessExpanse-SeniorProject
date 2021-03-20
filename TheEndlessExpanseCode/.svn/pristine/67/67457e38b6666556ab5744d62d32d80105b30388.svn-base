@@ -1,0 +1,426 @@
+package halemaster.ee.world.history.event;
+
+import halemaster.ee.world.Area;
+import halemaster.ee.world.Biome;
+import halemaster.ee.world.history.event.structures.Tree;
+import halemaster.ee.world.history.event.type.EventType;
+import halemaster.ee.world.history.event.type.EventTypeHolder;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * @name EventHolder
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class EventHolder 
+{
+  private class LockList
+  {
+    public List<Event> locked = new ArrayList<Event>();
+    public List<Event> unlocked = new ArrayList<Event>();
+    
+    public List<Event> getList (boolean locked)
+    {
+      if (locked)
+      {
+        return this.locked;
+      }
+      else
+      {
+        return this.unlocked;
+      }
+    }
+    
+    public void addEvent (Event event, boolean locked)
+    {
+      event.setLock (locked);
+      if (locked)
+      {
+        this.locked.add (event);
+      }
+      else
+      {
+        this.unlocked.add (event);
+      }
+    }
+    
+    public void changeLock (Event event, boolean locked)
+    {
+      this.unlocked.remove (event);
+      this.locked.remove (event);
+      addEvent (event, locked);
+    }
+    
+    public void removeEvent (Event event)
+    {
+      this.unlocked.remove (event);
+      this.locked.remove (event);
+    }
+  }
+  
+  private class TreeHolder
+  {
+    public LockList anywhere = new LockList();
+    public Tree<Integer, Tree<Integer, LockList>> eventLocations;
+  }
+  
+  private Tree <Integer, TreeHolder> events = new Tree<Integer, TreeHolder>();
+  private Set<EventTypeHolder> typeHolders = new HashSet<EventTypeHolder>();
+  private Biome[][] biomes;
+  
+  public EventHolder (Biome[][] biomes)
+  {
+    this.biomes = biomes;
+  }
+  
+  public EventHolder ()
+  {
+    this.biomes = null;
+  }
+  
+  public Biome[][] getWorld ()
+  {
+    return this.biomes;
+  }
+  
+  public int getWorldSize ()
+  {
+    return this.biomes.length;
+  }
+  
+  /**
+   * Add a new type holder to this event holder for reference.
+   * 
+   * @param holder holder to add.
+   */
+  public void addTypeHolder (EventTypeHolder holder)
+  {
+    this.typeHolders.add (holder);
+  }
+  
+  /**
+   * get the type from one of the holders from the id.
+   * 
+   * @param id id to look for.
+   * @return type found.
+   */
+  public EventType getType (String id)
+  {
+    EventType type = null;
+    
+    for (EventTypeHolder temp : this.typeHolders)
+    {
+      if (null == type)
+      {
+        type = temp.getType (id);
+      }
+    }
+    
+    return type;
+  }
+  
+  /**
+   * Get all events, either locked or unlocked, from the given parameters
+   * 
+   * @param begin begin date
+   * @param end end date
+   * @param left left x
+   * @param right right x
+   * @param top top y
+   * @param bottom bottom y
+   * @param locked whether events are locked
+   * @return all events in the given area.
+   */
+  public Event[] getEvents (int begin, int end, int left, int right, int top, 
+          int bottom, boolean locked)
+  {
+    Event[] foundEvents = new Event[0];
+    List<Event> listEvents = new ArrayList<Event>();
+    List<TreeHolder> dates;
+    List<Tree<Integer, LockList>> xLocations;
+    List<LockList> yLocations;
+    
+    dates = this.events.get (begin, end);
+    
+    for (TreeHolder date : dates)
+    {
+      listEvents.addAll (date.anywhere.getList (locked));
+      xLocations = date.eventLocations.get (left, right);
+      for (Tree<Integer, LockList> xLocation : xLocations)
+      {
+        yLocations = xLocation.get (top, bottom);
+        for (LockList yLocation : yLocations)
+        {
+          listEvents.addAll (yLocation.getList (locked));
+        }
+      }
+    }
+    
+    foundEvents = listEvents.toArray (foundEvents);
+    
+    return foundEvents;
+  }
+  
+  /**
+   * Find all events within the associated parameters.
+   * Although code seems copied and pasted, this version does not loop through
+   * the trees twice (one for locked and one for unlocked), thus saving time
+   * as opposed to just calling the above function twice.
+   * 
+   * @param begin
+   * @param end
+   * @param left
+   * @param right
+   * @param top
+   * @param bottom
+   * @return 
+   */
+  public Event[] getEvents (int begin, int end, int left, int right, int top, 
+          int bottom)
+  {
+    Event[] foundEvents = new Event[0];
+    List<Event> listEvents = new ArrayList<Event>();
+    List<TreeHolder> dates;
+    List<Tree<Integer, LockList>> xLocations;
+    List<LockList> yLocations;
+    
+    dates = this.events.get (begin, end);
+    
+    for (TreeHolder date : dates)
+    {
+      listEvents.addAll (date.anywhere.locked);
+      listEvents.addAll (date.anywhere.unlocked);
+      xLocations = date.eventLocations.get (left, right);
+      for (Tree<Integer, LockList> xLocation : xLocations)
+      {
+        yLocations = xLocation.get (top, bottom);
+        for (LockList yLocation : yLocations)
+        {
+          listEvents.addAll (yLocation.locked);
+          listEvents.addAll (yLocation.unlocked);
+        }
+      }
+    }
+    
+    foundEvents = listEvents.toArray (foundEvents);
+    
+    return foundEvents;
+  }
+  
+  /**
+   * Add a new event with the given locked condition to the holder.
+   * 
+   * @param event event to add.
+   * @param locked locked condition of the event.
+   */
+  public void addEvent (Event event, boolean locked)
+  {
+    TreeHolder date;
+    List<TreeHolder> dates;
+    Tree<Integer, LockList> xLocation;
+    List<Tree<Integer, LockList>> xLocations;
+    LockList yLocation;
+    List<LockList>yLocations;
+    
+    dates = this.events.get (event.getDate ());
+    
+    if (null == dates || 0 == dates.size ())
+    {
+      date = new TreeHolder ();
+      date.eventLocations = new Tree<Integer, Tree<Integer, LockList>>();
+      date.anywhere = new LockList();
+      if (Area.ANYWHERE.equals(event.getLocation ()))
+      {
+        date.anywhere.addEvent (event, locked);
+      }
+      else
+      {
+        xLocation = new Tree<Integer, LockList>();
+        yLocation = new LockList();
+        yLocation.addEvent (event, locked);
+        xLocation.add (event.getLocation ().getY (), yLocation);
+        date.eventLocations.add (event.getLocation ().getX (), xLocation);
+      }
+      this.events.add (event.getDate (), date);
+    }
+    else
+    {
+      for (TreeHolder tempDate : dates)
+      {
+        if (Area.ANYWHERE.equals (event.getLocation ()))
+        {
+          tempDate.anywhere.addEvent (event, locked);
+        }
+        else
+        {
+          xLocations = tempDate.eventLocations.get
+                  (event.getLocation ().getX ());
+          if (null == xLocations || 0 == xLocations.size ())
+          {
+            xLocation = new Tree<Integer, LockList>();
+            yLocation = new LockList();
+            yLocation.addEvent (event, locked);
+            xLocation.add (event.getLocation ().getY (), yLocation);
+            tempDate.eventLocations.add 
+                    (event.getLocation ().getX (), xLocation);
+          }
+          else
+          {
+            for (Tree<Integer, LockList> tempX : xLocations)
+            {
+              yLocations = tempX.get (event.getLocation ().getY ());
+              if (null == yLocations || 0 == yLocations.size ())
+              {
+                yLocation = new LockList();
+                yLocation.addEvent (event, locked);
+                tempX.add (event.getLocation ().getY (), yLocation);
+              }
+              else
+              {
+                for (LockList tempY : yLocations)
+                {
+                  tempY.addEvent (event, locked);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /**
+   * Lock all events in this holder based on the given event.
+   * 
+   * @param event event to lock other events on.
+   */
+  public void lockFromEvent (Event event)
+  {
+    Event[] lockoutEvents;
+    String lock;
+    boolean locks;
+    
+    lockoutEvents = getEvents (0, Integer.MAX_VALUE, 0, 
+            Integer.MAX_VALUE, 0, Integer.MAX_VALUE, false);
+    for (Event lockout : lockoutEvents)
+    {
+      lock = lockout.getType ().locksOut (event.getType ());
+      if (lock != null)
+      {
+        locks = false;
+        for (Map<String, String> values : 
+                lockout.getType ().getLockouts (event.getType ()))
+        {
+          boolean temp = true;
+          for (Map.Entry<String, String> value : values.entrySet ())
+          {
+            if (lockout.getVariable (value.getKey ()) != 
+                    event.getVariable (value.getValue ()))
+            {
+              temp = false;
+            }
+          }
+          if (temp)
+          {
+            locks = true;
+          }
+        }
+
+        if (locks)
+        {
+          setLock (lockout, true);
+        }
+      }
+    }
+  }
+  
+  /**
+   * Set the lock of the event given in the holder.
+   * 
+   * @param event event to change lock status of.
+   * @param locked the new lock status of the event.
+   */
+  public void setLock (Event event, boolean locked)
+  {
+    List<TreeHolder> dates;
+    List<Tree<Integer, LockList>> xLocations;
+    List<LockList> yLocations;
+    
+    dates = this.events.get (event.getDate ());
+    
+    if (null != dates && 0 != dates.size ())
+    {
+      for (TreeHolder tempDate : dates)
+      {
+        if (Area.ANYWHERE.equals (event.getLocation ()))
+        {
+          tempDate.anywhere.changeLock (event, locked);
+        }
+        else
+        {
+          xLocations = tempDate.eventLocations.get
+                  (event.getLocation ().getX ());
+          if (null != xLocations && 0 != xLocations.size ())
+          {
+            for (Tree<Integer, LockList> tempX : xLocations)
+            {
+              yLocations = tempX.get (event.getLocation ().getY ());
+              if (null != yLocations && 0 != yLocations.size ())
+              {
+                for (LockList tempY : yLocations)
+                {
+                  tempY.changeLock (event, locked);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  public void removeEvent (Event event)
+  {
+    List<TreeHolder> dates;
+    List<Tree<Integer, LockList>> xLocations;
+    List<LockList>yLocations;
+    
+    dates = this.events.get (event.getDate ());
+    
+    if (null != dates && 0 != dates.size ())
+    {
+      for (TreeHolder tempDate : dates)
+      {
+        if (Area.ANYWHERE.equals (event.getLocation ()))
+        {
+          tempDate.anywhere.removeEvent (event);
+        }
+        else
+        {
+          xLocations = tempDate.eventLocations.get
+                  (event.getLocation ().getX ());
+          if (null != xLocations && 0 != xLocations.size ())
+          {
+            for (Tree<Integer, LockList> tempX : xLocations)
+            {
+              yLocations = tempX.get (event.getLocation ().getY ());
+              if (null != yLocations && 0 != yLocations.size ())
+              {
+                for (LockList tempY : yLocations)
+                {
+                  tempY.removeEvent (event);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,57 @@
+game.title=The Endless Expanse
+
+game.menu.play=Play
+game.menu.back=Back
+game.menu.new=New
+game.menu.delete=Delete
+game.menu.create=Create
+game.menu.name=Name
+game.menu.save=Save
+game.menu.seed=Seed
+
+game.menu.worlds=Worlds
+game.menu.worlds.new=Create New World
+game.menu.characters=Characters
+game.menu.characters.new=Create New Character
+
+game.menu.options=Options
+
+game.menu.options.video=Video
+game.menu.options.video.fullScreen=Full Screen
+game.menu.options.video.vSync=Vertical Sync
+game.menu.options.video.width=Screen Width
+game.menu.options.video.height=Screen Height
+
+game.menu.options.sound=Sound
+
+game.menu.options.control=Controls
+game.menu.options.control.click=Click to Move
+game.menu.options.control.forward=Forward
+game.menu.options.control.back=Backward
+game.menu.options.control.left=Turn Left
+game.menu.options.control.right=Turn Right
+game.menu.options.control.strafe.left=Strafe Left
+game.menu.options.control.strafe.right=Strafe Right
+
+game.world.create.land=Shifting Tectonic Plates
+game.world.create.temp=Adding Ice
+game.world.create.rain=Placing Clouds
+game.world.create.biome=Making Pretty Colors
+game.world.create.file=Finding a Place in the Universe
+game.world.create.done=Built a World!
+
+game.hud.inventory=Inventory
+game.hud.chat.friendly=Hello {0}, how are you today?
+
+game.level=Level:
+game.xp=XP:
+game.points=Stat Points:
+game.health=Health:
+game.power=Power:
+game.agility=Agility:
+game.intellect=Intellect:
+game.armor=Armor:
+game.craft=Craft:
+game.damage=Damage:
+game.accuracy=Accuracy:
+game.critical=Critical:

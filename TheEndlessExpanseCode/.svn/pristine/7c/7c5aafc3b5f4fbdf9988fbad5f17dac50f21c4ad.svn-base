@@ -1,0 +1,48 @@
+package halemaster.ee.world.entity;
+
+import halemaster.ee.quest.ItemSet;
+
+/**
+ * @name Action
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 16, 2014
+ */
+public class Action 
+{
+  private Entity target;
+  private ItemSet item;
+  
+  public Action (Entity target, ItemSet item)
+  {
+    this.target = target;
+    this.item = item;
+  }
+
+  public Entity getTarget ()
+  {
+    return target;
+  }
+
+  public ItemSet getItem ()
+  {
+    return item;
+  }
+  
+  public boolean act (Entity user)
+  {
+    boolean worked = true;
+    
+    if (null == this.item)
+    {
+      // attack
+    }
+    else
+    {
+      // TODO: use the item if possible!
+    }
+    
+    return worked;
+  }
+}

@@ -1,0 +1,60 @@
+package halemaster.ee.state.start;
+
+import de.lessvoid.nifty.controls.TextField;
+import halemaster.ee.Game;
+import halemaster.ee.state.Menu;
+import java.io.File;
+
+/**
+ * @name MenuNewCharacter
+ * 
+ * @version 0.0.0
+ * 
+ * @date Oct 24, 2013
+ */
+public class MenuNewCharacter extends Menu
+{
+  public static final String FILE = "Interface/menu/newCharacter.xml";
+  public static final String ID = "newCharacter";
+  
+  public MenuNewCharacter ()
+  {
+    super (FILE, ID);
+  }
+  
+  /**
+   * Called when the create button is clicked.
+   * 
+   * @return whether the click is consumed.
+   */
+  public boolean create ()
+  {
+    TextField nameElement;
+    String characterName;
+    File charactersDirectory =  new File (Game.HOME + 
+            Game.GAME_FOLDER + Game.PLAYER_FOLDER);
+    File characterDirectory;
+    
+    nameElement = getNifty ().getCurrentScreen ()
+            .findNiftyControl ("name_text", TextField.class);
+    
+    characterName = nameElement.getText ();
+    
+    characterDirectory =
+            new File (charactersDirectory.getPath () + "/" + characterName);
+    
+    if (!charactersDirectory.exists ())
+    {
+      charactersDirectory.mkdirs ();
+    }
+    
+    if (!characterDirectory.exists ())
+    {
+      characterDirectory.mkdirs ();
+    }
+    
+    back ();
+    
+    return true;
+  }
+}

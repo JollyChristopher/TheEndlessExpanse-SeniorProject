@@ -1,0 +1,38 @@
+event.season.one=The Winter of {0}
+event.season.two=The Spring of {0}
+event.season.three=The Summer of {0}
+event.season.four=The Fall of {0}
+
+event.faction.create={0} is founded on {1}
+event.faction.fall={0} is dismantled on {1}
+event.faction.split={0} splits off from {1} on {2}
+event.faction.trade={0} increases trading with {1} on {2}
+event.faction.war={0} between {1} and {2} started on {3}
+event.faction.war.civil=The Civil War {1} broke out in {2}, on {3} and created {0}
+event.faction.war.battle.one={2} triumphs over {3} in {0} of {1} on {4}
+event.faction.war.battle.two={3} triumphs over {2} in {0} of {1} on {4}
+event.faction.dispute={0} has politically disagreed with {1} on {2}
+event.faction.rebuild={0} rebuilt itself on {1}
+event.faction.leader={1} became the new leader of {0} on {2}
+event.faction.leader.cout=A cout happened in {0}, and {1} took over on {2}
+event.faction.war.ends={0} between {1} and {2} ended on {3}
+event.faction.war.ends.treaty={0} between {1} and {2} ended on {3} with a treaty
+event.faction.war.ends.conquest={0} laid conquest to {2} during {1}, ending the war on {3}
+event.faction.war.ends.conquest.other={0} laid conquest to {2} during {1}, ending the war on {3}
+event.settlement.create={1} of {0} arose on {2}
+event.settlement.fall={0} fell on {1}
+event.settlement.rebuild={0} rebuilt itself on {1}
+event.settlement.grow={0} expanded a size group on {1}
+event.hero.create={0} became a hero on {1}
+event.hero.dies={0} died of a peaceful death on {1}
+event.hero.villain.fight={0} and {1} fought on {2}
+event.hero.villain.kill={0} killed {1} during a grewsome battle on {2}
+event.hero.faction.fights={0} fought for {1} on {2}
+event.hero.settlement.saves={0} saved {1} from {2} on {3}
+event.villain.create={0} became a villain on {1}
+event.villain.dies={0} died of a peaceful death on {1}
+event.villain.hero.kill={1} kills {0} during a loathsome fight on {2}
+event.villain.faction.fights={1} fought for {0} on {2}
+event.villain.settlement.terrorize={1} begins to terrorize {0} on {2}
+
+#Need to place new events for the micro history here

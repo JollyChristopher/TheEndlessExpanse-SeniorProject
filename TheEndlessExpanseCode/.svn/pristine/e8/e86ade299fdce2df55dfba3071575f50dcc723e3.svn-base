@@ -1,0 +1,74 @@
+package halemaster.ee.world.entity;
+
+import halemaster.ee.quest.ItemSet;
+import java.util.Random;
+
+/**
+ * @name Action
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 16, 2014
+ */
+public class Action 
+{
+  public static final int ACCURACY_UPPER = 10;
+  public static final int ACCURACY_LOWER = -5;
+  
+  private Entity target;
+  private ItemSet item;
+  
+  public Action (Entity target, ItemSet item)
+  {
+    this.target = target;
+    this.item = item;
+  }
+
+  public Entity getTarget ()
+  {
+    return target;
+  }
+
+  public ItemSet getItem ()
+  {
+    return item;
+  }
+  
+  public boolean act (Entity user)
+  {
+    boolean worked = true;
+    int damageLower, damageUpper, damage;
+    int armor;
+    int acc;
+    int crit;
+    Random random = new Random ();
+    
+    if (null == this.item)
+    {
+      damageLower = user.getDamageLower ();
+      damageUpper = user.getDamageUpper ();
+      armor = this.target.getStat (Statistic.ARMOR);
+      acc = user.getStat (Statistic.ACCURACY);
+      crit = user.getStat (Statistic.CRITICAL);
+      
+      damage = random.nextInt (damageUpper - damageLower + 1) + damageLower;
+      if (crit > random.nextInt (100))
+      {
+        damage *= Entity.CRIT_MODIFIER;
+      }
+      
+      if (acc + random.nextInt (ACCURACY_UPPER - ACCURACY_LOWER + 1) + 
+              ACCURACY_LOWER >= this.target.getStat (Statistic.LEVEL))
+      {
+        damage = Math.max (damage - armor, 1);
+        this.target.damage (damage, user);
+      }
+    }
+    else
+    {
+      // TODO: use the item if possible!
+    }
+    
+    return worked;
+  }
+}

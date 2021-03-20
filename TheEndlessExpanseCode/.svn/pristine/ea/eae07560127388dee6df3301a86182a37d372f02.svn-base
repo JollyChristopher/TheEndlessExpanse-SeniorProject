@@ -1,0 +1,34 @@
+package halemaster.ee.world.terrain.tile;
+
+/**
+ * @name BiomeTile
+ * 
+ * @version 0.0.0
+ * 
+ * @date Jan 30, 2014
+ */
+public class BiomeTile 
+{
+  byte biomeId;
+  int tileId;
+
+  public byte getBiomeId ()
+  {
+    return biomeId;
+  }
+
+  public void setBiomeId (byte biomeId)
+  {
+    this.biomeId = biomeId;
+  }
+
+  public int getTileId ()
+  {
+    return tileId;
+  }
+
+  public void setTileId (int tileId)
+  {
+    this.tileId = tileId;
+  }
+}

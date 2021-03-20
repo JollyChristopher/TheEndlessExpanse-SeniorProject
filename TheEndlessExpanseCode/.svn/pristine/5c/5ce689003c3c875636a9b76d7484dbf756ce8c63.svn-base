@@ -1,0 +1,158 @@
+package halemaster.ee.world.history.event.structures.types;
+
+import halemaster.ee.world.Area;
+import halemaster.ee.world.faction.Faction;
+import halemaster.ee.world.faction.Settlement;
+import halemaster.ee.world.history.event.Event;
+import halemaster.ee.world.history.event.structures.EventObject;
+import java.io.IOException;
+import java.util.Random;
+
+/**
+ * @name EventSettlement
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class EventSettlement implements EventObject
+{
+  public static final String ID = "settlement";
+  public static final String SEPARATOR = ";";
+  public static final int SPACING = 10;
+  public static final int HABITUALITY_SPACE = 5;
+  public static final int SIZE_PER_GROWTH_MAX = 256;
+  public static final int SIZE_PER_GROWTH_MIN = 64;
+  private String name;
+  private Event event;
+  private Random random;
+  private Area center = Area.ANYWHERE;
+  private String faction;
+  private int size = 1;
+  
+  public void setEvent (Event event)
+  {
+    this.event = event;
+  }
+  
+  public void init (Random random)
+  {
+    // get a random name here
+    this.random = random;
+    this.name = "settlement" + String.valueOf(random.nextInt ());
+    this.size = random.nextInt (SIZE_PER_GROWTH_MAX - SIZE_PER_GROWTH_MIN) 
+            + SIZE_PER_GROWTH_MIN;
+  }
+
+  public String getValue ()
+  {
+    String value = this.name + SEPARATOR + this.center.getX () + SEPARATOR + 
+            this.center.getY () + SEPARATOR + this.size;
+    
+    return value;
+  }
+  
+  public String getPrint ()
+  {
+    return this.name;
+  }
+  
+  public void setValue (String value)
+  {
+    int x, y;
+    String[] values = value.split (SEPARATOR);
+    
+    this.name = values[0];
+    x = Integer.valueOf (values[1]);
+    y = Integer.valueOf (values[2]);
+    this.size = Integer.valueOf (values[3]);
+    this.center = new Area (x, y);
+  }
+  
+  public String getType ()
+  {
+    return ID;
+  }
+
+  public void modify (EventObject modifier, String type)
+  {
+    
+  }
+  
+  public void setFaction (String faction)
+  {
+    this.faction = faction;
+  }
+  
+  public Area getAvailableGrowth ()
+  {
+    Area area = null;
+    try
+    {
+      Settlement settle = Faction.getFaction (this.event.getHolder ()
+            .getWorldName (), this.faction).getSettlement (this.name);
+      area = settle.getGrowth (this.random, 
+              this.event.getHolder ().getWorld ());
+    }
+    catch (IOException e)
+    {
+      // log some shit
+    }
+    return area;
+  }
+  
+  public Area findAvailableCenter ()
+  {
+    return Settlement.getNewCenter (this.random, 
+            this.event.getHolder ().getWorld ());
+  }
+  
+  public Area getCenter ()
+  {
+    return this.center;
+  }
+  
+  public void setCenter (int x, int y)
+  {
+    this.center = new Area (x, y);
+  }
+  
+  public Area[] getAreas ()
+  {
+    Area[] area = null;
+    try
+    {
+      Settlement settle = Faction.getFaction (this.event.getHolder ()
+            .getWorldName (), this.faction).getSettlement (this.name);
+      area = settle.getAreas ();
+    }
+    catch (IOException e)
+    {
+      // log some shit
+    }
+    return area;
+  }
+  
+  public void addGrowth (int x, int y)
+  {
+    
+    this.size += this.size = random.nextInt (SIZE_PER_GROWTH_MAX - 
+            SIZE_PER_GROWTH_MIN) + SIZE_PER_GROWTH_MIN;
+    try
+    {
+      Settlement settle = Faction.getFaction (this.event.getHolder ()
+            .getWorldName (), this.faction).getSettlement (this.name);
+      settle.addArea (x, y);
+      settle.setPopulation (this.size);
+    }
+    catch (IOException e)
+    {
+      // log some shit
+    }
+  }
+  
+  public int getSize ()
+  {
+    return this.size;
+  }
+}

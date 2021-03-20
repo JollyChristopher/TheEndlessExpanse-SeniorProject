@@ -1,0 +1,97 @@
+package halemaster.ee.world.history.event.structures;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
+
+/**
+ * @name Tree
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class Tree <key, type>
+{
+  TreeMap<key, List<type>> tree = new TreeMap<key, List<type>>();
+  
+  /**
+   * Add the object with the given type and key to the tree.
+   * 
+   * @param theKey the key to add to the tree
+   * @param theType the object to add to the tree.
+   */
+  public void add (key theKey, type theType)
+  {
+    List<type> objects;
+    
+    objects = this.tree.get (theKey);
+    if (null == objects)
+    {
+      objects = new ArrayList<type> ();
+      this.tree.put (theKey, objects);
+    }
+    
+    objects.add (theType);
+  }
+  
+  /**
+   * remove the key and object from the tree.
+   * Return all values at the given key.
+   * 
+   * @param theKey the key to find the object at.
+   * @param theType the object to remove. null means remove all.
+   * @return all values at the given key before removal.
+   */
+  public List<type> remove (key theKey, type theType)
+  {
+    List<type> objects;
+    
+    objects = this.tree.get (theKey);
+    
+    if (null != objects)
+    {
+      objects.remove (theType);
+      if (objects.isEmpty ())
+      {
+        this.tree.remove (theKey);
+      }
+    }
+    
+    return objects;
+  }
+  
+  /**
+   * Get all the values from the given key range.
+   * 
+   * @param key1 lower bound to search for.
+   * @param key2 upper bound to search for.
+   * @return array of values within the range.
+   */
+  public List<type> get (key key1, key key2)
+  {
+    List<type> objects = new ArrayList<type>();
+    SortedMap<key, List<type>> subMap = 
+            this.tree.subMap (key1, true, key2, true);
+    
+    for (Entry<key, List<type>> entry :subMap.entrySet ())
+    {
+      objects.addAll (entry.getValue ());
+    }
+    
+    return objects;
+  }
+  
+  /**
+   * Get the values associated with the particular key value
+   * 
+   * @param theKey the key value to get.
+   * @return the values associated with the key value
+   */
+  public List<type> get (key theKey)
+  {
+    return get (theKey, theKey);
+  }
+}

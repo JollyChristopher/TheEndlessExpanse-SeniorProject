@@ -1,0 +1,89 @@
+package halemaster.ee.item;
+
+import java.util.Map;
+import java.util.Map.Entry;
+
+/**
+ * @name StatModifier
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 23, 2014
+ */
+public class StatModifier 
+{
+  public static final float LEVEL_MODIFIER = 0.75f;
+  
+  private int damageLower;
+  private int damageUpper;
+  private Map<String, Integer> boost;
+
+  public int getDamageLower ()
+  {
+    return damageLower;
+  }
+  
+  public int getDamageLower (int level)
+  {
+    return (int) (getDamageLower () * level * LEVEL_MODIFIER);
+  }
+
+  public int getDamageUpper ()
+  {
+    return damageUpper;
+  }
+  
+  public int getDamageUpper (int level)
+  {
+    return (int) (getDamageUpper () * level * LEVEL_MODIFIER);
+  }
+
+  public Map<String, Integer> getBoost ()
+  {
+    return boost;
+  }
+  
+  public int getBoost (String id, int level)
+  {
+    if (null != getBoost ().get (id))
+    {
+      return (int) (getBoost ().get (id) * level * LEVEL_MODIFIER);
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  
+  @Override
+  public boolean equals (Object other)
+  {
+    boolean equal = true;
+    if (other instanceof StatModifier)
+    {
+      StatModifier otherModifier = (StatModifier) other;
+      equal &= this.damageLower == otherModifier.damageLower;
+      equal &= this.damageUpper == otherModifier.damageUpper;
+      equal &= this.boost.size () == otherModifier.boost.size ();
+      if (equal)
+      {
+        for (Entry<String, Integer> thisBoost : this.boost.entrySet ())
+        {
+          equal &= thisBoost.getValue ().equals (otherModifier.boost.get 
+                  (thisBoost.getKey ()));
+        }
+      }
+    }
+    return equal;
+  }
+
+  @Override
+  public int hashCode ()
+  {
+    int hash = 3;
+    hash = 89 * hash + this.damageLower;
+    hash = 89 * hash + this.damageUpper;
+    hash = 89 * hash + (this.boost != null ? this.boost.hashCode () : 0);
+    return hash;
+  }
+}

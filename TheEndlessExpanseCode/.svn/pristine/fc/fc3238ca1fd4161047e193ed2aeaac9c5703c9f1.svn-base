@@ -1,0 +1,1 @@
+{"images":{"normal":["Textures/entities/player_2.png"]}, "initialSprite":"normal", "speed":0, "name":"Perfectly Generic Monster", possibleBiomes:["Tundra", "Ice Cap", "Desert", "Plains", "Forest", "Rain Forest", "Mountains", "Snowy Mountains"]}

@@ -1,0 +1,30 @@
+package halemaster.ee.world.entity;
+
+import halemaster.ee.world.Area;
+import halemaster.ee.world.history.event.EventHolder;
+import halemaster.ee.world.terrain.tile.BiomeTile;
+import java.util.Random;
+
+/**
+ * @name EntityGenerator
+ * 
+ * @version 0.0.0
+ * 
+ * @date Feb 11, 2014
+ */
+public class EntityGenerator 
+{
+  /**
+   * Generate all entities that would exist in the area.
+   * @param events events for the world
+   * @param location location to generate
+   * @param tiles tiles in the location
+   * @param random random to use to generate
+   * @return array of entities, which can then be used for anything
+   */
+  public static Entity[] generate (EventHolder events, Area location, 
+          BiomeTile[][] tiles, Random random)
+  {
+    return null;
+  }
+}

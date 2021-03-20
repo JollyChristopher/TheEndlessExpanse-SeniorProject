@@ -1,0 +1,108 @@
+package halemaster.ee.quest;
+
+import halemaster.ee.world.Biome;
+import halemaster.ee.world.entity.Entity;
+import halemaster.ee.world.history.event.Event;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * @name QuestTemplate
+ * 
+ * @version 0.0.0
+ * 
+ * @date Mar 5, 2014
+ */
+public class QuestTemplate 
+{
+  private static List<QuestTemplate> loadedTemplates = null;
+  
+  private String id;
+  private Map<String, Integer[]> kill;
+  private Map<String, Integer[]> item;
+  private Map<String, String[]>talk;
+  private String[] jobs;
+  private String[] biomes;
+  private String[] history;
+  private String[] chain;
+  private int offerRate;
+  private int talkCount;
+  private String[] turnIn;
+
+  public String getId ()
+  {
+    return id;
+  }
+
+  public Map<String, Integer[]> getKill ()
+  {
+    return kill;
+  }
+
+  public Map<String, Integer[]> getItem ()
+  {
+    return item;
+  }
+
+  public Map<String, String[]> getTalk ()
+  {
+    return talk;
+  }
+
+  public String[] getJobs ()
+  {
+    return jobs;
+  }
+
+  public String[] getBiomes ()
+  {
+    return biomes;
+  }
+
+  public String[] getHistory ()
+  {
+    return history;
+  }
+
+  public String[] getChain ()
+  {
+    return chain;
+  }
+
+  public int getOfferRate ()
+  {
+    return offerRate;
+  }
+
+  public int getTalkCount ()
+  {
+    return talkCount;
+  }
+
+  public String[] getTurnIn ()
+  {
+    return turnIn;
+  }
+  
+  /**
+   * Get the possible quest templates for the given information.
+   * @param entity npc who would offer the quest
+   * @param history history relating to that npc
+   * @param biome biome the npc comes from
+   * @param otherEntities other entities near the npc
+   * @return list of quest templates that can be used.
+   */
+  public static List<QuestTemplate> possibleQuests (Entity entity,
+          List<Event> history, Biome biome, List<Entity> otherEntities)
+  {
+    return null;
+  }
+  
+  /**
+   * reload all templates from Quests folder
+   */
+  public static void loadTemplates ()
+  {
+    
+  }
+}

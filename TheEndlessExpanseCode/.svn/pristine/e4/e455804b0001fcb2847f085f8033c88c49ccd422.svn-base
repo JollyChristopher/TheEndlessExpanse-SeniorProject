@@ -1,0 +1,238 @@
+package halemaster.ee.world.history.event.structures.types;
+
+import halemaster.ee.world.Area;
+import halemaster.ee.world.Biome;
+import halemaster.ee.world.history.event.Event;
+import halemaster.ee.world.history.event.structures.EventObject;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Queue;
+import java.util.Random;
+
+/**
+ * @name EventSettlement
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class EventSettlement implements EventObject
+{
+  public static final String ID = "settlement";
+  public static final int SPACING = 10;
+  public static final int HABITUALITY_SPACE = 5;
+  private String name;
+  private Event event;
+  private Random random;
+  private Area center;
+  private ArrayList<Area> growth = new ArrayList<Area>();
+  
+  public void setEvent (Event event)
+  {
+    this.event = event;
+  }
+  
+  public void init (Random random)
+  {
+    // get a random name here
+    this.random = random;
+    this.name = "settlement" + String.valueOf(random.nextInt ());
+  }
+
+  public String getValue ()
+  {
+    return this.name;
+  }
+  
+  public String getPrint ()
+  {
+    return this.name;
+  }
+  
+  public void setValue (String value)
+  {
+    this.name = value;
+  }
+  
+  public String getType ()
+  {
+    return ID;
+  }
+
+  public void modify (EventObject modifier, String type)
+  {
+    
+  }
+  
+  public Area getAvailableGrowth ()
+  {
+    Area newGrowth = null;
+    ArrayList<Area> possible = new ArrayList<Area>();
+    HashMap<String, Area> notPossible = new HashMap<String, Area>();
+    String loc;
+    
+    if (null != this.center)
+    {
+      possible.add (new Area (center.getX () + 1, center.getY ()));
+      possible.add (new Area (center.getX () - 1, center.getY ()));
+      possible.add (new Area (center.getX (), center.getY () + 1));
+      possible.add (new Area (center.getX (), center.getY () - 1));
+      notPossible.put (String.valueOf (center.getX ()) + "," + String.valueOf (
+        center.getY ()), center);
+      
+      for (Area temp : this.growth)
+      {
+        for (int index = 0; index < possible.size (); index++)
+        {
+          if (possible.get (index).getX () == temp.getX () && 
+                  possible.get (index).getY () == temp.getY ())
+          {
+            possible.remove (index);
+            loc = String.valueOf (temp.getX () + 1) + "," + String.valueOf (
+              temp.getY ());
+            if (null == notPossible.get (loc) && 0 <= temp.getX () + 1 && 
+                    this.event.getHolder ().getWorldSize () > temp.getX () + 1 
+                    && 0 <= temp.getY () && 
+                    this.event.getHolder ().getWorldSize () > temp.getY () 
+                    && 0 < this.event.getHolder ()
+                    .getWorld ()[temp.getX () + 1][temp.getY ()]
+                    .getHabituality ())
+            {
+              possible.add (new Area (temp.getX () + 1, temp.getY ()));
+            }
+            loc = String.valueOf (temp.getX () - 1) + "," + String.valueOf (
+              temp.getY ());
+            if (null == notPossible.get (loc) && 0 <= temp.getX () - 1 && 
+                    this.event.getHolder ().getWorldSize () > temp.getX () - 1 
+                    && 0 <= temp.getY () && 
+                    this.event.getHolder ().getWorldSize () > temp.getY () 
+                    && 0 < this.event.getHolder ()
+                    .getWorld ()[temp.getX () - 1][temp.getY ()]
+                    .getHabituality ())
+            {
+              possible.add (new Area (temp.getX () - 1, temp.getY ()));
+            }
+            loc = String.valueOf (temp.getX ()) + "," + String.valueOf (
+              temp.getY () + 1);
+            if (null == notPossible.get (loc) && 0 <= temp.getX () && 
+                    this.event.getHolder ().getWorldSize () > temp.getX () 
+                    && 0 <= temp.getY () + 1 && 
+                    this.event.getHolder ().getWorldSize () > temp.getY () + 1
+                    && 0 < this.event.getHolder ()
+                    .getWorld ()[temp.getX ()][temp.getY () + 1]
+                    .getHabituality ())
+            {
+              possible.add (new Area (temp.getX (), temp.getY () + 1));
+            }
+            loc = String.valueOf (temp.getX ()) + "," + String.valueOf (
+              temp.getY () - 1);
+            if (null == notPossible.get (loc) && 0 <= temp.getX () && 
+                    this.event.getHolder ().getWorldSize () > temp.getX () 
+                    && 0 <= temp.getY () - 1 && 
+                    this.event.getHolder ().getWorldSize () > temp.getY () - 1
+                    && 0 < this.event.getHolder ()
+                    .getWorld ()[temp.getX ()][temp.getY () - 1]
+                    .getHabituality ())
+            {
+              possible.add (new Area (temp.getX (), temp.getY () - 1));
+            }
+            loc = String.valueOf (temp.getX ()) + "," + String.valueOf (
+              temp.getY ());
+            notPossible.put (loc, temp);
+          }
+        }
+      }
+      
+      newGrowth = possible.get (this.random.nextInt (possible.size ()));
+    }
+    return newGrowth;
+  }
+  
+  public Area findAvailableCenter ()
+  {
+    Area newCenter = null;
+    Biome[][] world = this.event.getHolder ().getWorld ();
+    Queue<Area> nextPoints = new ArrayDeque<Area>();
+    HashSet<Area> visited = new HashSet<Area>();
+    Area currentPoint = new Area (this.random.nextInt 
+            (this.event.getHolder ().getWorldSize ()), this.random.nextInt 
+            (this.event.getHolder ().getWorldSize ()));
+    byte habituality = Byte.MAX_VALUE;
+    
+    while (null == newCenter)
+    {
+      if (habituality <= world[currentPoint.getX ()][currentPoint.getY ()]
+              .getHabituality ())
+      {
+        newCenter = currentPoint;
+      }
+      else
+      {
+        if (0 <= currentPoint.getX () + SPACING && world.length > 
+                currentPoint.getX () + SPACING && 0 <= currentPoint.getY () && 
+                world.length > currentPoint.getY ())
+        nextPoints.add (new Area (currentPoint.getX () + SPACING, currentPoint.getY ()));
+        if (0 <= currentPoint.getX () - SPACING && world.length > 
+                currentPoint.getX () - SPACING && 0 <= currentPoint.getY () && 
+                world.length > currentPoint.getY ())
+        nextPoints.add (new Area (currentPoint.getX () - SPACING, currentPoint.getY ()));
+        if (0 <= currentPoint.getX () && world.length > 
+                currentPoint.getX () && 0 <= currentPoint.getY () + SPACING && 
+                world.length > currentPoint.getY () + SPACING)
+        nextPoints.add (new Area (currentPoint.getX (), currentPoint.getY () + SPACING));
+        if (0 <= currentPoint.getX () && world.length > 
+                currentPoint.getX () && 0 <= currentPoint.getY () - SPACING && 
+                world.length > currentPoint.getY () - SPACING)
+        nextPoints.add (new Area (currentPoint.getX (), currentPoint.getY () - SPACING));
+        
+        habituality -= HABITUALITY_SPACE;
+        
+        for (Area visit : visited)
+        {
+          if (habituality <= world[visit.getX ()][visit.getY ()].getHabituality ())
+          {
+            newCenter = visit;
+          }
+        }
+        
+        if (0 < world[currentPoint.getX ()][currentPoint.getY ()]
+              .getHabituality ())
+        {
+          visited.add (currentPoint);
+        }
+      }
+      currentPoint = nextPoints.poll ();
+    }
+    
+    return newCenter;
+  }
+  
+  public Area getCenter ()
+  {
+    return this.center;
+  }
+  
+  public void setCenter (int x, int y)
+  {
+    this.center = new Area (x, y);
+  }
+  
+  public Area[] getGrowth ()
+  {
+    Area[] growths = new Area[this.growth.size ()];
+    
+    for (int i = 0; i < growths.length; i++)
+    {
+      growths[i] = this.growth.get (i);
+    }
+    
+    return growths;
+  }
+  
+  public void addGrowth (int x, int y)
+  {
+    this.growth.add (new Area (x, y));
+  }
+}

@@ -1,0 +1,335 @@
+package halemaster.ee.world.history.event.type;
+
+import halemaster.ee.world.Area;
+import halemaster.ee.world.history.event.Event;
+import halemaster.ee.world.history.event.EventHolder;
+import halemaster.ee.world.history.event.structures.EventObjectType;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
+
+/**
+ * @name EventMapper
+ * 
+ * @version 0.0.0
+ * 
+ * @date Nov 19, 2013
+ */
+public class EventMapper 
+{
+  private EventType type;
+  private Map<String, List<List<Event>>> parents = 
+          new HashMap<String, List<List<Event>>>();
+  private Map<String, Integer> required = new HashMap<String, Integer>();
+  
+  public EventType getType ()
+  {
+    return this.type;
+  }
+  
+  /**
+   * create the event in the holder given the values.
+   * 
+   * @param holder holder to create event in.
+   * @param random random to use for creation.
+   * @param date date the event happens on.
+   * @param area area the event happens in.
+   * @param lockEvents whether to lock events in the holder based on this event.
+   * @throws InstantiationException
+   * @throws IllegalAccessException 
+   */
+  public void createEvent (EventHolder holder, Random random, int date,
+          Area area, boolean lockEvents) throws InstantiationException, 
+          IllegalAccessException
+  {
+    Event event;
+    List<Map<String, String>> parentVars;
+    Map<String, Integer> parentCount = new HashMap<String, Integer>();
+    Integer parentAmount;
+    List<Event> tempPartners;
+    EventMapper mapper;
+    
+    if (canCreateEvent ())
+    {
+      event = new Event ();
+      event.setType (this.type);
+      event.setDate (date);
+      event.setLocation (area.getX (), area.getY ());
+      event.setHolder (holder);
+      event.setSettled (lockEvents);
+      shave (null);
+      // set parent variables
+      for (Entry<String, Integer> entry : this.required.entrySet ())
+      {
+        if (null == event.getVariable (entry.getKey ()))
+        {
+          tempPartners = this.parents.get (entry.getKey ()).get
+                  (random.nextInt (this.parents.get (entry.getKey ()).size ()));
+          for (Event partner : tempPartners)
+          {
+            parentAmount = parentCount.get
+                    (this.type.getCountedDependency (partner.getType ()));
+            if (null == parentAmount)
+            {
+              parentAmount = 0;
+              parentCount.put (this.type.getCountedDependency 
+                      (partner.getType ()), parentAmount);
+            }
+            parentVars = this.type.getDependencies (partner.getType ());
+            if (parentAmount < parentVars.size ())
+            {
+              parentAmount++;
+              for (Entry<String, String> var : parentVars.get (parentAmount - 1)
+                      .entrySet ())
+              {
+                event.addVariable (var.getKey (), 
+                        partner.getVariable (var.getValue ()));
+              }
+            }
+          }
+        }
+        
+        shave (event);
+      }
+      
+      // create new variables
+      for (String variable : this.type.getVariables ())
+      {
+        if (null == event.getVariable (variable))
+        {
+          event.addVariable (variable, EventObjectType.getByType
+                  (this.type.getVariableType (variable)).getObject (random));
+          event.getVariable (variable).setEvent (event);
+        }
+      }
+      
+      // modify values
+      for (String change : this.type.getChangesIds ())
+      {
+        for (Entry<String, String> changer : 
+                this.type.getChanges (change).entrySet ())
+        {
+          event.getVariable (change).modify 
+                  (event.getVariable (changer.getKey ()), changer.getValue ());
+        }
+      }
+      
+      if (lockEvents)
+      {
+        holder.lockFromEvent (event);
+      }
+      
+      holder.addEvent (event, false);
+      
+      if (lockEvents)
+      {
+        // create causes
+        for (String causeId : this.type.getCausesIds ())
+        {
+          for (Entry<String, String> chances : 
+                  this.type.getCauses (causeId).entrySet ())
+          {
+            try
+            {
+              if (random.nextInt (100) <
+                      Integer.valueOf (chances.getKey ().split ("%")[0]))
+              {
+                mapper = new EventMapper ();
+                mapper.setType (holder.getType (causeId));
+                mapper.addRequired (this.type);
+                mapper.addParent (event);
+                String[] timeRange = chances.getValue ().split("-");
+                mapper.createEvent (holder, random, date + (random.nextInt 
+                        (Integer.valueOf (timeRange[1]) - 
+                        Integer.valueOf(timeRange[0]) + 1) + 
+                        Integer.valueOf(timeRange[0])), area, false);
+              }
+            }
+            catch (NumberFormatException ex)
+            {
+              //TODO: log this
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /**
+   * Shave away any parent partners that cannot be used to create the event.
+   */
+  private void shave (Event withEvent)
+  {
+    Set<Entry<String, Integer>> requiredEvents = this.required.entrySet ();
+    Iterator<Entry<String, Integer>> iterator = requiredEvents.iterator ();
+    Entry<String, Integer> event;
+    List<List<Event>> partners;
+    
+    while (iterator.hasNext ())
+    {
+      event = iterator.next ();
+      partners = this.parents.get (event.getKey ());
+      for (int i = 0; i < partners.size (); i++)
+      {
+        if (partners.get (i).size () != event.getValue ())
+        {
+          partners.remove (i);
+        }
+        else if (null != withEvent)
+        {
+          for (Event partnerSet : partners.get (i))
+          {
+            boolean fits = false;
+            for (Map<String, String> vars : withEvent.getType ()
+                    .getDependencies (partnerSet.getType ()))
+            {
+              boolean match = true;
+              for (Entry<String, String> var : vars.entrySet ())
+              {
+                if (null != withEvent.getVariable (var.getKey ()) && 
+                        withEvent.getVariable (var.getKey ()) != 
+                        partnerSet.getVariable (var.getKey ()))
+                {
+                  match = false;
+                }
+              }
+              if (!match)
+              {
+                fits = true;
+              }
+            }
+            if (fits)
+            {
+              partners.remove (i);
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  /**
+   * Determine whether this mapper is able to be turned into an event.
+   * 
+   * @return whether this mapper can create an event.
+   */
+  public boolean canCreateEvent ()
+  {
+    Set<Entry<String, Integer>> requiredEvents = this.required.entrySet ();
+    Iterator<Entry<String, Integer>> iterator = requiredEvents.iterator ();
+    Entry<String, Integer> event;
+    List<List<Event>> partners;
+    boolean canCreate = true;
+    boolean matchPartner;
+    
+    while (canCreate && iterator.hasNext ())
+    {
+      event = iterator.next ();
+      partners = this.parents.get (event.getKey ());
+      matchPartner = false;
+      if (null != partners)
+      {
+        for (int i = 0; !matchPartner && i < partners.size (); i++)
+        {
+          if (partners.get (i).size () == event.getValue ())
+          {
+            matchPartner = true;
+          }
+        }
+      }
+      if (!matchPartner)
+      {
+        canCreate = false;
+      }
+    }
+    
+    return canCreate;
+  }
+
+  public void setType (EventType type)
+  {
+    this.type = type;
+  }
+  
+  /**
+   * Add the given event as a parent to this mapper.
+   * 
+   * @param event event to add as a parent for this mapper.
+   */
+  public void addParent (Event event)
+  {
+    List<Map<String, String>> dependencies = 
+            this.type.getDependencies (event.getType ());
+    List<List<Event>> events;
+    List<List<Event>> tempSetEvents;
+    List<Event> tempEvents;
+    
+    for (Map<String, String> dep : dependencies)
+    {
+      for (Entry<String, String> entry : dep.entrySet ())
+      {
+        events = this.parents.get (entry.getKey ());
+        if (null == events)
+        {
+          events = new ArrayList<List<Event>>();
+          this.parents.put (entry.getKey (), events);
+        }
+        
+        tempSetEvents = new ArrayList<List<Event>>();
+        for (List<Event> partners : events)
+        {
+          if (partners.get (0) != event &&
+                  partners.get (0).getVariable (entry.getKey ()) == 
+                  event.getVariable (entry.getKey()))
+          {
+            tempEvents = new ArrayList<Event>();
+            tempEvents.add (event);
+            for (Event ev : partners)
+            {
+              tempEvents.add (ev);
+            }
+            tempSetEvents.add (tempEvents);
+          }
+        }
+        events.addAll (tempSetEvents);
+        tempEvents = new ArrayList<Event>();
+        tempEvents.add (event);
+        events.add (tempEvents);
+      }
+    }
+  }
+  
+  /**
+   * Add one to the required amount of the given id for the mapper.
+   * 
+   * @param variable variable to add to required amount of parents needed
+   */
+  public void addRequired (String variable)
+  {
+    Integer parentValue = this.required.get (variable);
+    
+    if (null == parentValue)
+    {
+      parentValue = 0;
+      this.required.put (variable, parentValue);
+    }
+    
+    parentValue++;
+  }
+  
+  public void addRequired (EventType type)
+  {
+    for (Map<String, String> deps : this.type.getDependencies (type))
+    {
+      for (Entry<String, String> entry : deps.entrySet ())
+      {
+        addRequired (entry.getKey ());
+      }
+    }
+  }
+}

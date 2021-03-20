@@ -1,0 +1,272 @@
+package halemaster.ee;
+
+import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.AppState;
+import com.jme3.app.state.ScreenshotAppState;
+import com.jme3.input.KeyInput;
+import com.jme3.scene.Node;
+import com.jme3.system.AppSettings;
+import com.jme3.system.JmeSystem;
+import halemaster.ee.ai.AIManager;
+import halemaster.ee.ai.MovementAI;
+import halemaster.ee.ai.OfferAI;
+import halemaster.ee.ai.WanderAI;
+import halemaster.ee.localization.Localizer;
+import halemaster.ee.state.PlayerState;
+import halemaster.ee.state.start.MenuStart;
+import halemaster.ee.world.BiomeClassifier;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+
+/**
+ * @name Game
+ * 
+ * @version 0.0.0
+ * 
+ * @date 2013-10-12
+ */
+@SuppressWarnings ("ClassWithMultipleLoggers")
+public class Game extends SimpleApplication
+{
+  public static final Logger LOGGER_ALL = Logger.getLogger ("");
+  public static final Logger LOGGER = Logger.getLogger (Game.class.getName ());
+  public static final String DEBUG = "--debug";
+  public static final String GAME_FOLDER = "/.endlessExpanse";
+  public static final String WORLD_FOLDER = "/worlds";
+  public static final String PLAYER_FOLDER = "/players";
+  public static final String SCREENSHOTS = "/screenshots/";
+  public static final String BIOME_FOLDER = "assets/Biomes";
+  public static final String VERSION = "0.1.0";
+  public static final String SETTINGS = "halemaster.ee.Settings";
+  public static final String MOVEMENT_AI = "movement";
+  public static final String WANDER_AI = "wander";
+  public static final String QUEST_AI = "quest";
+  public static final String HOME = 
+          JmeSystem.getStorageFolder ().getAbsolutePath ();
+  private ConcurrentLinkedQueue<Sprite> attachSprites = 
+          new ConcurrentLinkedQueue<Sprite>();
+  private ConcurrentLinkedQueue<Sprite> detachSprites = 
+          new ConcurrentLinkedQueue<Sprite>();
+  private Node SpriteNode = new Node ();
+  private List<Sprite> currentlyAttached = new ArrayList<Sprite>();
+  
+  /**
+   * Main class for the entire game. Runs on startup.
+   * 
+   * @param args Arguments passed to the game.
+   */
+  public static void main (String[] args)
+  {
+    Game application;
+    AppSettings settings = new AppSettings (true);
+    boolean debug = false;
+    
+    for (String arg : args)
+    {
+      if (DEBUG.equals (arg))
+      {
+        debug = true;
+      }
+    }
+    
+    application = new Game (debug);
+         
+    settings.putBoolean (PlayerState.CLICK_NAME, true);
+    settings.putString (PlayerState.FORWARD, "W" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_W);
+    settings.putString (PlayerState.BACKWARD, "S" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_S);
+    settings.putString (PlayerState.LEFT, "A" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_A);
+    settings.putString (PlayerState.RIGHT, "D" + 
+            PlayerState.EVENT_SPLITTER + KeyInput.KEY_D);
+    
+    try
+    {
+      settings.load(Game.SETTINGS);
+    }
+    catch (BackingStoreException exception)
+    {
+      LOGGER.log (Level.WARNING, "Failed to load settings", exception);
+    }
+    
+    settings.setTitle(Localizer.getString ("game.title"));
+    application.setSettings (settings);
+    
+    AIManager.registerAI (MOVEMENT_AI, MovementAI.class);
+    AIManager.registerAI (WANDER_AI, WanderAI.class);
+    AIManager.registerAI (QUEST_AI, OfferAI.class);
+    
+    application.start ();
+  }
+  
+  public Game ()
+  {
+    this (false);
+  }
+  
+  public Game (boolean debugInitial)
+  {
+    setDebug (debugInitial);    
+  }
+
+  /**
+   * Initialization of the game. Get rid of default debug info.
+   */
+  @Override
+  public void simpleInitApp ()
+  {
+    AppSettings apps = this.settings;
+    File biomeFolder = new File (BIOME_FOLDER);
+    
+    this.flyCam.setEnabled (false);
+    
+    apps.setRenderer (AppSettings.LWJGL_OPENGL_ANY);
+    apps.setEmulateMouse (true);
+    apps.setEmulateMouseFlipAxis (false, false);
+    
+    setSettings (apps);
+    restart ();
+    
+    new File (HOME + GAME_FOLDER + SCREENSHOTS).mkdirs ();
+    ScreenshotAppState screenShotState = new ScreenshotAppState();
+    screenShotState.setFilePath (HOME + GAME_FOLDER + SCREENSHOTS);
+    addAppState(screenShotState);
+    
+    try
+    {
+      for (File biome : biomeFolder.listFiles ())
+      {
+        BiomeClassifier.loadBiomes (biome);
+      }
+
+      addAppState (new MenuStart ());
+    }
+    catch (IOException e)
+    {
+      handleError ("Could not load Biomes. Make sure they are in the correct"
+              + "package!", e);
+    }
+    
+    this.rootNode.attachChild (SpriteNode);
+  }
+  
+  @Override
+  public void simpleUpdate (float tpf)
+  {
+    updateSprites ();
+    for (Sprite runner : this.currentlyAttached)
+    {
+      runner.update (tpf);
+    }
+  }
+  
+  public void updateSprites ()
+  {
+    Sprite sprite;
+    
+    while (!this.attachSprites.isEmpty ())
+    {
+      sprite = this.attachSprites.poll ();
+      sprite.attachTo (this.SpriteNode);
+      this.currentlyAttached.add (sprite);
+    }
+    while (!this.detachSprites.isEmpty ())
+    {
+      sprite = this.detachSprites.poll ();
+      sprite.detachFrom (this.SpriteNode);
+      this.currentlyAttached.remove (sprite);
+    }
+  }
+  
+  public Node getSpriteNode ()
+  {
+    return this.SpriteNode;
+  }
+  
+  /**
+   * Attach the given sprite at the earliest convenience.
+   * 
+   * @param sprite sprite to attach
+   */
+  public void attachSprite (Sprite sprite)
+  {
+    this.attachSprites.add (sprite);
+  }
+  
+  /**
+   * Detach the given sprite from the root at the earliest possible time
+   * 
+   * @param sprite sprite to detach
+   */
+  public void detachSprite (Sprite sprite)
+  {
+    this.detachSprites.add (sprite);
+  }
+  
+  /**
+   * Handles any errors that are thrown to the Game.
+   * 
+   * @param errorMessage Message thrown to the Game.
+   * @param thrown Throwable that was thrown to the Game.
+   */
+  @Override
+  public void handleError (String errorMessage, Throwable thrown)
+  {
+    LOGGER.log (Level.SEVERE, errorMessage, thrown);
+    stop ();
+  }
+  
+  /**
+   * Turn Debugging on or off.
+   * 
+   * @param debug what to turn debugging to.
+   */
+  public final void setDebug (boolean debug)
+  {
+    setDisplayFps (debug);
+    setDisplayStatView (debug);
+    setShowSettings (debug);
+    
+    if (debug)
+    {
+      LOGGER_ALL.setLevel (Level.ALL);
+    }
+    else
+    {
+      LOGGER_ALL.setLevel (Level.SEVERE);
+    }
+  }
+  
+  /**
+   * Add the given app state to the game.
+   * 
+   * @param state the state to add.
+   */
+  public void addAppState (AppState state)
+  {
+    this.stateManager.attach (state);
+  }
+  
+  /**
+   * remove the given app state from the game.
+   * 
+   * @param state the state to remove.
+   * @return whether the state was removed successfully.
+   */
+  public boolean removeAppState (AppState state)
+  {
+    return this.stateManager.detach (state);
+  }
+  
+  public AppSettings getSettings ()
+  {
+    return this.settings;
+  }
+}
